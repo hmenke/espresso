@@ -227,6 +227,7 @@ CUDA_SOURCE_FILES = \
 	electrokinetics_cuda.cu \
 	fd-electrostatics_cuda.cu \
 	lbgpu_cuda.cu \
+	lb_moving_boundaries.cu \
 	p3m_gpu_cuda.cu \
 	EspressoSystemInterface_cuda.cu \
 	integrate_sd_cuda.cu \
