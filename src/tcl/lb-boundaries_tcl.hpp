@@ -40,6 +40,7 @@ int tclcommand_lbboundary_stomatocyte(LB_Boundary *lbb, Tcl_Interp *interp, int 
 int tclcommand_lbboundary_hollow_cone(LB_Boundary *lbb, Tcl_Interp *interp, int argc, char **argv);
 int tclcommand_lbboundary_voxel(LB_Boundary *lbb, Tcl_Interp *interp, int argc, char **argv);
 int tclcommand_lbboundary_box(LB_Boundary *lbb, Tcl_Interp *interp, int argc, char **argv);
+int tclcommand_lbboundary_moving(LB_Boundary *lbb, Tcl_Interp *interp, int argc, char** argv);
 int tclcommand_printLbBoundaryToResult(Tcl_Interp *interp, int i);
 
 #endif /* LB_BOUNDARIES || LB_BOUNDARIES_GPU */

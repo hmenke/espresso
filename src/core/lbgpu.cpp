@@ -114,6 +114,8 @@ LB_parameters_gpu lbpar_gpu = {
   0,
   // number_of_particles
   0,
+  // number_of_anchors
+  0,
   // fluct
   0,
   // calc_val

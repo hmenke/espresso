@@ -291,9 +291,40 @@ LB_Boundary *generate_lbboundary()
   lb_boundaries[n_lb_boundaries-1].velocity[1]=
   lb_boundaries[n_lb_boundaries-1].velocity[2]=0;
   
-  lb_boundaries[n_lb_boundaries-1].force[0]=
-  lb_boundaries[n_lb_boundaries-1].force[1]=
+  lb_boundaries[n_lb_boundaries-1].force[0]=0;
+  lb_boundaries[n_lb_boundaries-1].force[1]=0;
   lb_boundaries[n_lb_boundaries-1].force[2]=0;
+  
+  lb_boundaries[n_lb_boundaries-1].body_force[0]=0;
+  lb_boundaries[n_lb_boundaries-1].body_force[1]=0;
+  lb_boundaries[n_lb_boundaries-1].body_force[2]=0;
+  
+  lb_boundaries[n_lb_boundaries-1].torque[0] = 0;
+  lb_boundaries[n_lb_boundaries-1].torque[1] = 0;
+  lb_boundaries[n_lb_boundaries-1].torque[2] = 0;
+  
+  lb_boundaries[n_lb_boundaries-1].body_torque[0] = 0;
+  lb_boundaries[n_lb_boundaries-1].body_torque[1] = 0;
+  lb_boundaries[n_lb_boundaries-1].body_torque[2] = 0;
+  
+  lb_boundaries[n_lb_boundaries-1].omega[0] = 0;
+  lb_boundaries[n_lb_boundaries-1].omega[1] = 0;
+  lb_boundaries[n_lb_boundaries-1].omega[2] = 0;
+  
+  lb_boundaries[n_lb_boundaries-1].quat[0] = 1;
+  lb_boundaries[n_lb_boundaries-1].quat[1] = 0;
+  lb_boundaries[n_lb_boundaries-1].quat[2] = 0;
+  lb_boundaries[n_lb_boundaries-1].quat[3] = 0;
+  
+  lb_boundaries[n_lb_boundaries-1].rinertia[0] = 0;
+  lb_boundaries[n_lb_boundaries-1].rinertia[1] = 0;
+  lb_boundaries[n_lb_boundaries-1].rinertia[2] = 0;
+  
+  lb_boundaries[n_lb_boundaries-1].mass = 0;
+  lb_boundaries[n_lb_boundaries-1].n_anchors = 0;
+  
+  lb_boundaries[n_lb_boundaries-1].anchors = NULL;
+  
   
 #ifdef EK_BOUNDARIES
   if (ek_initialized)
@@ -304,6 +335,7 @@ LB_Boundary *generate_lbboundary()
   
   return &lb_boundaries[n_lb_boundaries-1];
 }
+
 
 int tclcommand_lbboundary_wall(LB_Boundary *lbb, Tcl_Interp *interp, int argc, char **argv)
 {
@@ -407,6 +439,7 @@ int tclcommand_lbboundary_sphere(LB_Boundary *lbb, Tcl_Interp *interp, int argc,
   lbb->c.sph.direction = -1;
 
   while (argc > 0) {
+   
     if(ARG_IS_S(0, "center")) {
       if(argc < 4) {
 	      Tcl_AppendResult(interp, "lbboundary sphere center <x> <y> <z> expected", (char *) NULL);
@@ -1437,6 +1470,196 @@ int tclcommand_lbboundary_box(LB_Boundary *lbb, Tcl_Interp *interp, int argc, ch
   return (TCL_OK);
 }
 
+int tclcommand_lbboundary_moving(LB_Boundary *lbb, Tcl_Interp *interp, int argc, char **argv)
+{
+  n_lb_moving_boundaries++;
+
+  lbb->type = LB_BOUNDARY_MOVING;
+  
+  //Tcl_AppendResult(interp, "Warning: moving boundaries only supported on GPU", (char *) NULL);
+  /* using sphere constraint to pass data to gpu. */
+  lbb->c.sph.pos[0] = 
+  lbb->c.sph.pos[1] = 
+  lbb->c.sph.pos[2] = 0;
+  lbb->c.sph.rad = 0;
+  lbb->c.sph.direction = -1;
+
+  while (argc > 0) {
+   
+    if(ARG_IS_S(0, "center")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving center <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->c.sph.pos[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->c.sph.pos[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->c.sph.pos[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "velocity")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving velocity <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->velocity[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->velocity[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->velocity[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "force")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving force <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->force[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->force[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->force[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "body_force")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving body_force <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->body_force[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->body_force[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->body_force[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "torque")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving torque <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->torque[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->torque[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->torque[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "body_torque")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving body_torque <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->body_torque[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->body_torque[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->body_torque[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "rinertia")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving rinertia <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->rinertia[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->rinertia[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->rinertia[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "omega")) {
+      if(argc < 4) {
+	      Tcl_AppendResult(interp, "lbboundary moving omega <x> <y> <z> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->omega[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->omega[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->omega[2])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 4; argv += 4;
+    }
+    else if(ARG_IS_S(0, "quat") || ARG_IS_S(0, "orientation")) {
+      if(argc < 5) {
+	      Tcl_AppendResult(interp, "lbboundary moving quat <chi> <eta> <xi> <zeta> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      if(Tcl_GetDouble(interp, argv[1], &(lbb->quat[0])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[2], &(lbb->quat[1])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[3], &(lbb->quat[2])) == TCL_ERROR ||
+	       Tcl_GetDouble(interp, argv[4], &(lbb->quat[3])) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+        argc -= 5; argv += 5;
+    }
+    else if(ARG_IS_S(0, "radius")) {
+      if(argc < 1) {
+	      Tcl_AppendResult(interp, "lbboundary moving radius <r> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      
+      if (Tcl_GetDouble(interp, argv[1], &(lbb->c.sph.rad)) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+      argc -= 2; argv += 2;
+    }
+    else if(ARG_IS_S(0, "mass")) {
+      if(argc < 1) {
+	      Tcl_AppendResult(interp, "lbboundary moving mass <m> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      
+      if (Tcl_GetDouble(interp, argv[1], &(lbb->mass)) == TCL_ERROR)
+	      return (TCL_ERROR);
+	      
+      argc -= 2; argv += 2;
+    }
+    else if(ARG_IS_S(0, "type")) {
+      if (argc < 1) {
+	      Tcl_AppendResult(interp, "lbboundary moving type <t> expected", (char *) NULL);
+	      return (TCL_ERROR);
+      }
+      
+      argc -= 2; argv += 2;
+    }
+    else if(ARG_IS_S(0, "anchors")) {
+      if(argc < 5) {
+	      Tcl_AppendResult(interp, "lbboundary moving anchor <n> <x1> <y1> <z1> <r1> <x2>... expected", (char *) NULL);
+	      return (TCL_ERROR);
+	  }
+	  double n_anchor;
+	  double temp;
+	  if (Tcl_GetDouble(interp, argv[1], &(n_anchor)) == TCL_ERROR)
+	      return (TCL_ERROR);
+	  unsigned int n_anchor_i = (unsigned int) (n_anchor + 0.5f);
+	  float *anchors = (float*) malloc(n_anchor_i*4*sizeof(float));
+	  int ii;
+	  for(ii=2; ii<(4*n_anchor + 2); ii++){
+	    if (Tcl_GetDouble(interp, argv[ii], &(temp)) == TCL_ERROR)
+	        return (TCL_ERROR);
+	    anchors[ii-2]=temp;
+	  }
+	  lbb->anchors = anchors;
+	  lbb->n_anchors = (int)n_anchor_i;
+	  
+	  argc -= 2+4*n_anchor_i; argv += 2+4*n_anchor_i;
+	}
+    else
+      break;
+  }
+
+  if(lbb->c.sph.rad < 0.) {
+    Tcl_AppendResult(interp, "usage: lbboundary moving center <x> <y> <z> radius <d> direction <direction> type <t>", (char *) NULL);
+    return (TCL_ERROR);    
+  }
+
+  return (TCL_OK);
+}
+
+
 #endif /* LB_BOUNDARIES or LB_BOUNDARIES_GPU */
 
 int tclcommand_lbboundary(ClientData data, Tcl_Interp *interp, int argc, char **argv)
@@ -1512,7 +1735,14 @@ int tclcommand_lbboundary(ClientData data, Tcl_Interp *interp, int argc, char **
     status = tclcommand_lbboundary_voxel(generate_lbboundary(),interp, argc - 2, argv + 2);
     if (lattice_switch & LATTICE_LB_GPU) {
         mpi_bcast_lbboundary(-3);
-    } else 
+    } else
+        mpi_bcast_lbboundary(-1);
+  } 
+  else if(ARG_IS_S(1, "moving")) {
+    status = tclcommand_lbboundary_moving(generate_lbboundary(), interp, argc -2, argv + 2);
+    if (lattice_switch & LATTICE_LB_GPU) {
+        mpi_bcast_lbboundary(-3);
+    } else
         mpi_bcast_lbboundary(-1);
   }
   else if(ARG_IS_S(1, "force")) {
@@ -1564,7 +1794,7 @@ int tclcommand_lbboundary(ClientData data, Tcl_Interp *interp, int argc, char **
     status = TCL_OK;
   }
   else {
-    Tcl_AppendResult(interp, "possible lbboundary parameters: wall, sphere, cylinder, rhomboid, pore, stomatocyte, hollow_cone, voxel, delete {c} to delete lbboundary",(char *) NULL);
+    Tcl_AppendResult(interp, "possible lbboundary parameters: wall, sphere, cylinder, rhomboid, pore, stomatocyte, hollow_cone, voxel, moving, delete {c} to delete lbboundary",(char *) NULL);
     return (TCL_ERROR);
   }
 

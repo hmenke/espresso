@@ -62,6 +62,8 @@
 #define LB_BOUNDARY_SPHEROCYLINDER 9
 /** voxel data */
 #define LB_BOUNDARY_VOXEL 10
+/** moving boundaries **/
+#define LB_BOUNDARY_MOVING 11
 
 // If we have several possible types of boundary treatment
 #define LB_BOUNDARY_BOUNCE_BACK 1
@@ -85,7 +87,16 @@ typedef struct {
     Constraint_voxel voxel;
   } c;
   double force[3];
+  double torque[3];//only moving boundary
   double velocity[3];
+  double omega[3];//moving boundary
+  double quat[4];//moving boundary
+  double mass;
+  int n_anchors;
+  float *anchors;
+  double rinertia[3]; 
+  double body_torque[3]; 
+  double body_force[3]; 
 #ifdef EK_BOUNDARIES
   float charge_density;
   float net_charge;
@@ -93,6 +104,7 @@ typedef struct {
 } LB_Boundary;
 
 extern int n_lb_boundaries;
+extern int n_lb_moving_boundaries;
 extern LB_Boundary *lb_boundaries;
 
 /*@}*/
@@ -103,7 +115,6 @@ extern LB_Boundary *lb_boundaries;
  */
 void lb_init_boundaries();
 void lbboundary_mindist_position(double pos[3], double* mindist, double distvec[3], int* no); 
-
 int lbboundary_get_force(int no, double* f); 
 
 #endif // (LB_BOUNDARIES) || (LB_BOUNDARIES_GPU)

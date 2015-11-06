@@ -227,10 +227,9 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
 #endif
 
   int err = TCL_OK;
-  int intarg;
   double floatarg;
   double vectarg[3+LB_COMPONENTS + (LB_COMPONENTS*(LB_COMPONENTS-1))/2];
-
+  char double_buffer[TCL_DOUBLE_SPACE];
   if (argc < 1)
   {
     lbfluid_tcl_print_usage(interp);
@@ -660,7 +659,7 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
       {
 #ifdef EXTERNAL_FORCES
         int i;
-
+        int intarg;
         if ( argc <= 3*LB_COMPONENTS ) 
         {
               Tcl_AppendResult(interp, "ext_force requires 3 arguments per component", (char *)NULL);
@@ -763,6 +762,124 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
             {
               return TCL_ERROR;
             }
+          }
+          else if (ARG0_IS_S_EXACT("moving"))
+          {
+            double print_val[3];
+            int part_num;
+            if ( Tcl_GetInt(interp, argv[1], &part_num))
+            {
+              //no int given TODO
+            }
+            else {
+              argc -= 2; argv += 2;
+              
+              if (ARG0_IS_S("position")||ARG0_IS_S("center"))
+              {
+                if ( lb_lbfluid_print_moving_pos(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);          
+              }
+              else if (ARG0_IS_S("velocity"))
+              {
+                if ( lb_lbfluid_print_moving_vel(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);  
+              }
+              else if (ARG0_IS_S_EXACT("omega_body"))
+              {
+                if ( lb_lbfluid_print_moving_omega_body(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL); 
+              }
+              else if (ARG0_IS_S_EXACT("omega") || ARG0_IS_S_EXACT("omega_lab"))
+              {
+                if ( lb_lbfluid_print_moving_omega_lab(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL); 
+              }
+              else if (ARG0_IS_S_EXACT("force") || ARG0_IS_S_EXACT("force_lab"))
+              {
+                if ( lb_lbfluid_print_moving_force_lab(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL); 
+              }
+              else if (ARG0_IS_S_EXACT("force_body"))
+              {
+                if ( lb_lbfluid_print_moving_force_body(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL); 
+              }
+              else if (ARG0_IS_S_EXACT("torque") || ARG0_IS_S_EXACT("torque_lab"))
+              {
+                if ( lb_lbfluid_print_moving_torque_lab(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL); 
+              }
+              else if (ARG0_IS_S_EXACT("torque_body"))
+              {
+                if ( lb_lbfluid_print_moving_torque_body(part_num, print_val))
+                {
+                  //error handling TODO
+                }
+                Tcl_PrintDouble(interp, print_val[0], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
+                Tcl_PrintDouble(interp, print_val[1], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);
+                Tcl_PrintDouble(interp, print_val[2], double_buffer);
+                Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL); 
+              }
+            }
+            argc--; argv++;
           }
           else
           { 
