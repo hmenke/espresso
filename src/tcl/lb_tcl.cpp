@@ -778,7 +778,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_pos(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
@@ -791,7 +792,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_vel(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
@@ -804,7 +806,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_omega_body(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
@@ -817,7 +820,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_omega_lab(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
@@ -830,7 +834,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_force_lab(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
@@ -843,7 +848,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_force_body(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
@@ -856,7 +862,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_torque_lab(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            
@@ -869,7 +876,8 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
               {
                 if ( lb_lbfluid_print_moving_torque_body(part_num, print_val))
                 {
-                  //error handling TODO
+                  Tcl_AppendResult(interp, "Bad Boundary index at lbfluid print moving", (char *)NULL);
+                  return TCL_ERROR;
                 }
                 Tcl_PrintDouble(interp, print_val[0], double_buffer);
                 Tcl_AppendResult(interp, double_buffer, " ", (char *) NULL);            

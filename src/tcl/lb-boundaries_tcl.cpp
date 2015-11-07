@@ -1522,7 +1522,7 @@ int tclcommand_lbboundary_moving(LB_Boundary *lbb, Tcl_Interp *interp, int argc,
 	      
         argc -= 4; argv += 4;
     }
-    else if(ARG_IS_S(0, "body_force")) {
+    else if(ARG_IS_S(0, "force_body")) {
       if(argc < 4) {
 	      Tcl_AppendResult(interp, "lbboundary moving body_force <x> <y> <z> expected", (char *) NULL);
 	      return (TCL_ERROR);
@@ -1546,7 +1546,7 @@ int tclcommand_lbboundary_moving(LB_Boundary *lbb, Tcl_Interp *interp, int argc,
 	      
         argc -= 4; argv += 4;
     }
-    else if(ARG_IS_S(0, "body_torque")) {
+    else if(ARG_IS_S(0, "torque_body")) {
       if(argc < 4) {
 	      Tcl_AppendResult(interp, "lbboundary moving body_torque <x> <y> <z> expected", (char *) NULL);
 	      return (TCL_ERROR);
