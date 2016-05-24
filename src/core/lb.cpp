@@ -1898,6 +1898,13 @@ static void lb_realloc_fluid() {
     }
 
     lbfields = (LB_FluidNode*) Utils::realloc(lbfields,lblattice.halo_grid_volume*sizeof(*lbfields));
+
+#ifdef LB_MAXWELL_VISCOELASTICITY
+    for (int index = 0; index < lblattice.halo_grid_volume; index++)
+    {
+      memset(lbfields[index].maxwell_stress, 0, 3*sizeof(double));
+    }
+#endif
 }
 
 
