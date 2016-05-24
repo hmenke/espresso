@@ -185,6 +185,9 @@ void lbfluid_tcl_print_usage(Tcl_Interp *interp)
 #ifdef SHANCHEN
   Tcl_AppendResult(interp, "        [ coupling #float ]\n", (char *)NULL);
 #endif
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  Tcl_AppendResult(interp, "        [ elastic_coefficient #float ] [ memory_time #float ]\n", (char *)NULL);
+#endif
 }
 
 void lbnode_tcl_print_usage(Tcl_Interp *interp) 
@@ -884,6 +887,66 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
         return tclcommand_lbfluid_print_interpolated_velocity(interp, argc-1, argv+1);
       }
 #endif
+      else if ( ARG0_IS_S_EXACT("elastic_coefficient") )
+      {
+#ifdef LB_MAXWELL_VISCOELASTICITY
+        if ( argc < 2 || !ARG1_IS_D(floatarg) )
+        {
+          Tcl_AppendResult(interp, "elastic_coefficient requires 1 argument", (char *)NULL);
+          return TCL_ERROR;
+        }
+        else if (floatarg <= 0)
+        {
+          Tcl_AppendResult(interp, "elastic_coefficient must be positive", (char *)NULL);
+          return TCL_ERROR;
+        }
+        else
+        {
+          if ( lb_lbfluid_set_elastic_coefficient(floatarg) == 0 )
+          {
+            argc-=2; argv+=2;
+          }
+          else
+          {
+            Tcl_AppendResult(interp, "Unknown Error setting elastic_coefficient", (char *)NULL);
+            return TCL_ERROR;
+          }
+        }
+#else
+        Tcl_AppendResult(interp, "LB_MAXWELL_VISCOELASTICITY not compiled in!", (char *)NULL);
+        return TCL_ERROR;
+#endif
+      }
+      else if ( ARG0_IS_S_EXACT("memory_time") )
+      {
+#ifdef LB_MAXWELL_VISCOELASTICITY
+        if ( argc < 2 || !ARG1_IS_D(floatarg) )
+        {
+          Tcl_AppendResult(interp, "memory_time requires 1 argument", (char *)NULL);
+          return TCL_ERROR;
+        }
+        else if (floatarg <= 0)
+        {
+          Tcl_AppendResult(interp, "memory_time must be positive", (char *)NULL);
+          return TCL_ERROR;
+        }
+        else
+        {
+          if ( lb_lbfluid_set_memory_time(floatarg) == 0 )
+          {
+            argc-=2; argv+=2;
+          }
+          else
+          {
+            Tcl_AppendResult(interp, "Unknown Error setting memory_time", (char *)NULL);
+            return TCL_ERROR;
+          }
+        }
+#else
+        Tcl_AppendResult(interp, "LB_MAXWELL_VISCOELASTICITY not compiled in!", (char *)NULL);
+        return TCL_ERROR;
+#endif
+      }
       else
       {
         Tcl_AppendResult(interp, "unknown feature \"", argv[0],"\" of lbfluid", (char *)NULL);

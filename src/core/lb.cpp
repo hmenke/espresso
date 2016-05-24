@@ -82,7 +82,13 @@ LB_Parameters lbpar = {
     // is_TRT
     false,
     // resend_halo
-    0
+    0,
+#ifdef LB_MAXWELL_VISCOELASTICITY
+    // elastic_coefficient
+    0,
+    // memory_time
+    1,
+#endif
 };
 
 /** The DnQm model to be used. */
@@ -513,6 +519,44 @@ int lb_lbfluid_set_ext_force(int component, double p_fx, double p_fy, double p_f
   }
   return 0;
 }
+
+
+#ifdef LB_MAXWELL_VISCOELASTICITY
+int lb_lbfluid_set_elastic_coefficient(double p_elastic_coefficient){
+  if ( p_elastic_coefficient <= 0 )
+    return -1;
+  if (lattice_switch & LATTICE_LB_GPU) {
+#ifdef LB_GPU
+    lbpar_gpu.elastic_coefficient = (float)p_elastic_coefficient;
+    on_lb_params_change_gpu(0);
+#endif // LB_GPU
+  } else {
+#ifdef LB
+    lbpar.elastic_coefficient = p_elastic_coefficient;
+    mpi_bcast_lb_params(0);
+#endif // LB
+  }
+  return 0;
+}
+
+
+int lb_lbfluid_set_memory_time(double p_memory_time){
+  if ( p_memory_time <= 0 )
+    return -1;
+  if (lattice_switch & LATTICE_LB_GPU) {
+#ifdef LB_GPU
+    lbpar_gpu.memory_time = (float)p_memory_time;
+    on_lb_params_change_gpu(0);
+#endif // LB_GPU
+  } else {
+#ifdef LB
+    lbpar.memory_time = p_memory_time;
+    mpi_bcast_lb_params(0);
+#endif // LB
+  }
+  return 0;
+}
+#endif
 
 
 int lb_lbfluid_get_density(double *p_dens) {
@@ -2503,6 +2547,68 @@ inline void lb_apply_forces(index_t index, double* mode) {
     f = lbfields[index].force;
 
     rho = mode[0] + lbpar.rho[0]*lbpar.agrid*lbpar.agrid*lbpar.agrid;
+
+#ifdef LB_MAXWELL_VISCOELASTICITY
+    // I. Ispolatov and M. Grant, `Lattice Boltzmann method forviscoelastic fluids', Phys. Rev. E 65, 056704 (2002)
+    // R. C. O'Reilly and J. M. Beck, `A Family of Large-Stencil Discrete Laplacian Approximations in Three Dimensions', Int. J. Numer. Meth. Engng. (2006) 1-16
+    double agrid2 = lbpar.agrid*lbpar.agrid;
+    double laplace_u[3] = {-4.0f/agrid2*mode[1], -4.0f/agrid2*mode[2], -4.0f/agrid2*mode[3]};
+
+    int yperiod = lblattice.halo_grid[0];
+    int zperiod = lblattice.halo_grid[0]*lblattice.halo_grid[1];
+    index_t next[19];
+    next[0]  = index;
+    next[1]  = index + 1;
+    next[2]  = index - 1;
+    next[3]  = index + yperiod;
+    next[4]  = index - yperiod;
+    next[5]  = index + zperiod;
+    next[6]  = index - zperiod;
+    next[7]  = index + (1 + yperiod);
+    next[8]  = index - (1 + yperiod);
+    next[9]  = index + (1 - yperiod);
+    next[10] = index - (1 - yperiod);
+    next[11] = index + (1 + zperiod);
+    next[12] = index - (1 + zperiod);
+    next[13] = index + (1 - zperiod);
+    next[14] = index - (1 - zperiod);
+    next[15] = index + (yperiod + zperiod);
+    next[16] = index - (yperiod + zperiod);
+    next[17] = index + (yperiod - zperiod);
+    next[18] = index - (yperiod - zperiod);
+
+    #pragma unroll
+    for (int ii=1; ii<7; ii++)
+    {
+        double rho, j[3];
+        lb_calc_local_fields(next[ii], &rho, j, NULL);
+        laplace_u[0] += 1.0/(3.0*agrid2) * j[0]*rho;
+        laplace_u[1] += 1.0/(3.0*agrid2) * j[1]*rho;
+        laplace_u[2] += 1.0/(3.0*agrid2) * j[2]*rho;
+    }
+
+    #pragma unroll
+    for (int ii=7; ii<19; ii++)
+    {
+        double rho, j[3];
+        lb_calc_local_fields(next[ii], &rho, j, NULL);
+        laplace_u[0] += 1.0/(6.0*agrid2) * j[0]*rho;
+        laplace_u[1] += 1.0/(6.0*agrid2) * j[1]*rho;
+        laplace_u[2] += 1.0/(6.0*agrid2) * j[2]*rho;
+    }
+
+    lbfields[index].maxwell_stress[0] *= 1.0 - 1.0/lbpar.memory_time;
+    lbfields[index].maxwell_stress[1] *= 1.0 - 1.0/lbpar.memory_time;
+    lbfields[index].maxwell_stress[2] *= 1.0 - 1.0/lbpar.memory_time;
+
+    lbfields[index].maxwell_stress[0] += lbpar.elastic_coefficient/lbpar.memory_time * laplace_u[0];
+    lbfields[index].maxwell_stress[1] += lbpar.elastic_coefficient/lbpar.memory_time * laplace_u[1];
+    lbfields[index].maxwell_stress[2] += lbpar.elastic_coefficient/lbpar.memory_time * laplace_u[2];
+
+    f[0] += lbfields[index].maxwell_stress[0];
+    f[1] += lbfields[index].maxwell_stress[1];
+    f[2] += lbfields[index].maxwell_stress[2];
+#endif
 
     /* hydrodynamic momentum density is redefined when external forces present */
     u[0] = (mode[1] + 0.5 * f[0])/rho;
