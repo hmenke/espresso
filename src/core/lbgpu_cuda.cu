@@ -42,6 +42,28 @@
 #error CU-file includes mpi.h! This should not happen!
 #endif
 
+#ifdef LB_MAXWELL_VISCOELASTICITY
+__device__ int d3q19_lattice[19][3] = { {  0,  0,  0 },
+                                        {  1,  0,  0 },
+                                        { -1,  0,  0 },
+                                        {  0,  1,  0 },
+                                        {  0, -1,  0 },
+                                        {  0,  0,  1 },
+                                        {  0,  0, -1 },
+                                        {  1,  1,  0 },
+                                        { -1, -1,  0 },
+                                        {  1, -1,  0 },
+                                        { -1,  1,  0 },
+                                        {  1,  0,  1 },
+                                        { -1,  0, -1 },
+                                        {  1,  0, -1 },
+                                        { -1,  0,  1 },
+                                        {  0,  1,  1 },
+                                        {  0, -1, -1 },
+                                        {  0,  1, -1 },
+                                        {  0, -1,  1 } };
+#endif
+
 #if (!defined(FLATNOISE) && !defined(GAUSSRANDOMCUT) && !defined(GAUSSRANDOM))
 #define FLATNOISE
 #endif
@@ -75,10 +97,16 @@ static LB_rho_v_pi_gpu *print_rho_v_pi= NULL;
 
 /** structs for velocity densities */
 static LB_nodes_gpu nodes_a = {.vd=NULL,.seed=NULL,.boundary=NULL};
-static LB_nodes_gpu nodes_b = {.vd=NULL,.seed=NULL,.boundary=NULL};;
+static LB_nodes_gpu nodes_b = {.vd=NULL,.seed=NULL,.boundary=NULL};
 /** struct for node force */
 
-LB_node_force_gpu node_f = {.force=NULL,.scforce=NULL} ;
+LB_node_force_gpu node_f = {
+  .force=NULL,
+  .scforce=NULL,
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  .maxwell_stress=NULL,
+#endif
+};
 
 static LB_extern_nodeforce_gpu *extern_nodeforces = NULL;
 
@@ -260,13 +288,22 @@ __device__ void random_wrapper(LB_randomnr_gpu *rn) {
  * @param xyz     Pointer to calculated xyz array (Output)
  */
 __device__ void index_to_xyz(unsigned int index, unsigned int *xyz){
-
   xyz[0] = index%para.dim_x;
   index /= para.dim_x;
   xyz[1] = index%para.dim_y;
   index /= para.dim_y;
   xyz[2] = index;
 }
+
+
+/**tranformation from xyz to 1d array-index
+ * @param xyz     Pointer xyz array (Input)
+ * @param index   Calculated node index / thread index (Output)
+ */
+__device__ unsigned int xyz_to_index(unsigned int *xyz){
+  return para.dim_y*(xyz[0]*para.dim_x + xyz[1]) + xyz[2];
+}
+
 
 /**calculation of the modes from the velocity densities (space-transform.)
  * @param n_a     Pointer to local node residing in array a (Input)
@@ -1162,6 +1199,58 @@ __device__ void apply_forces(unsigned int index, float *mode, LB_node_force_gpu 
   u[0]=d_v[index].v[0]; 
   u[1]=d_v[index].v[1]; 
   u[2]=d_v[index].v[2]; 
+
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  // I. Ispolatov and M. Grant, `Lattice Boltzmann method forviscoelastic fluids', Phys. Rev. E 65, 056704 (2002)
+  // R. C. O'Reilly and J. M. Beck, `A Family of Large-Stencil Discrete Laplacian Approximations in Three Dimensions', Int. J. Numer. Meth. Engng. (2006) 1-16
+  float agrid2 = para.agrid*para.agrid;
+  float laplace_u[3] = {-4.0f/agrid2*u[0], -4.0f/agrid2*u[1], -4.0f/agrid2*u[2]};
+
+  #pragma unroll
+  for (int ii=1; ii<7; ii++)
+  {
+    unsigned int xyz[3];
+    index_to_xyz(index, xyz);
+    xyz[0] += d3q19_lattice[ii][0];
+    xyz[1] += d3q19_lattice[ii][1];
+    xyz[2] += d3q19_lattice[ii][2];
+
+    float *uu = d_v[xyz_to_index(xyz)].v;
+    laplace_u[0] += 1.0f/(3.0f*agrid2) * uu[0];
+    laplace_u[1] += 1.0f/(3.0f*agrid2) * uu[1];
+    laplace_u[2] += 1.0f/(3.0f*agrid2) * uu[2];
+  }
+
+  #pragma unroll
+  for (int ii=7; ii<19; ii++)
+  {
+    unsigned int xyz[3];
+    index_to_xyz(index, xyz);
+    xyz[0] += d3q19_lattice[ii][0];
+    xyz[1] += d3q19_lattice[ii][1];
+    xyz[2] += d3q19_lattice[ii][2];
+
+    float *uu = d_v[xyz_to_index(xyz)].v;
+    laplace_u[0] += 1.0f/(6.0f*agrid2) * uu[0];
+    laplace_u[1] += 1.0f/(6.0f*agrid2) * uu[1];
+    laplace_u[2] += 1.0f/(6.0f*agrid2) * uu[2];
+  }
+
+  for(int ii=0;ii<LB_COMPONENTS;++ii)
+  {
+     node_f.maxwell_stress[(0+ii*3)*para.number_of_nodes + index] *= 1.0f - 1.0f/para.memory_time;
+     node_f.maxwell_stress[(1+ii*3)*para.number_of_nodes + index] *= 1.0f - 1.0f/para.memory_time;
+     node_f.maxwell_stress[(2+ii*3)*para.number_of_nodes + index] *= 1.0f - 1.0f/para.memory_time;
+
+     node_f.maxwell_stress[(0+ii*3)*para.number_of_nodes + index] += para.elastic_coefficient/para.memory_time * laplace_u[0];
+     node_f.maxwell_stress[(1+ii*3)*para.number_of_nodes + index] += para.elastic_coefficient/para.memory_time * laplace_u[1];
+     node_f.maxwell_stress[(2+ii*3)*para.number_of_nodes + index] += para.elastic_coefficient/para.memory_time * laplace_u[2];
+
+     node_f.force[(0 + ii*3 ) * para.number_of_nodes + index] += node_f.maxwell_stress[(0+ii*3)*para.number_of_nodes + index];
+     node_f.force[(1 + ii*3 ) * para.number_of_nodes + index] += node_f.maxwell_stress[(1+ii*3)*para.number_of_nodes + index];
+     node_f.force[(2 + ii*3 ) * para.number_of_nodes + index] += node_f.maxwell_stress[(2+ii*3)*para.number_of_nodes + index];
+  }
+#endif
 
   #pragma unroll
   for(int ii=0;ii<LB_COMPONENTS;++ii)
@@ -3151,8 +3240,12 @@ void lb_init_GPU(LB_parameters_gpu *lbpar_gpu){
   /* TODO: this is a almost a copy copy of  device_rho_v think about eliminating it, and maybe pi can be added to device_rho_v in this case*/
   free_and_realloc(print_rho_v_pi  , size_of_rho_v_pi);
   free_and_realloc(nodes_a.vd      , lbpar_gpu->number_of_nodes * 19 * LB_COMPONENTS * sizeof(float));
-  free_and_realloc(nodes_b.vd      , lbpar_gpu->number_of_nodes * 19 * LB_COMPONENTS * sizeof(float));   
+  free_and_realloc(nodes_b.vd      , lbpar_gpu->number_of_nodes * 19 * LB_COMPONENTS * sizeof(float));
   free_and_realloc(node_f.force    , lbpar_gpu->number_of_nodes *  3 * LB_COMPONENTS * sizeof(lbForceFloat));
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  free_and_realloc(node_f.maxwell_stress, lbpar_gpu->number_of_nodes *  3 * LB_COMPONENTS * sizeof(lbForceFloat));
+  cuda_safe_mem(cudaMemset(node_f.maxwell_stress, 0, lbpar_gpu->number_of_nodes *  3 * LB_COMPONENTS * sizeof(lbForceFloat)));
+#endif
 #if defined(IMMERSED_BOUNDARY) || defined(EK_DEBUG)
   free_and_realloc(node_f.force_buf    , lbpar_gpu->number_of_nodes *  3 * LB_COMPONENTS * sizeof(lbForceFloat));
 #endif

@@ -103,6 +103,7 @@ EK_DOUBLE_PREC                  requires ELECTROKINETICS
 LATTICE                         equals LB or LB_GPU
 SHANCHEN                        implies LB_GPU
 SHANCHEN                        requires not ELECTROKINETICS
+LB_MAXWELL_VISCOELASTICITY      requires LB or LB_GPU
 
 /* Stokesian-Dynamics features */
 BD
