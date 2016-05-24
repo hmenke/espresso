@@ -139,6 +139,9 @@ typedef struct {
   double *nvec; //doesn't work like that any more, I think (georg, 17.08.10)
 #endif // LB_BOUNDARIES
 
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  double maxwell_stress[3];
+#endif
 } LB_FluidNode;
 
 /** Data structure holding the parameters for the Lattice Boltzmann system. */
@@ -177,7 +180,11 @@ typedef struct {
   bool is_TRT;
 
   int resend_halo;
-          
+
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  double elastic_coefficient;
+  double memory_time;
+#endif
 } LB_Parameters;
 
 /** The DnQm model to be used. */
@@ -532,6 +539,10 @@ int lb_lbfluid_get_ext_force(double* p_f);
 int lb_lbfluid_set_shanchen_coupling(double * p_coupling);
 int lb_lbfluid_set_mobility(double * p_mobility);
 #endif 
+#ifdef LB_MAXWELL_VISCOELASTICITY
+int lb_lbfluid_set_elastic_coefficient(double p_elastic_coefficient);
+int lb_lbfluid_set_memory_time(double p_memory_time);
+#endif
 int lb_set_lattice_switch(int py_switch);
 int lb_get_lattice_switch(int* py_switch);
 

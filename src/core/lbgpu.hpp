@@ -138,7 +138,12 @@ typedef struct {
   float mobility[LB_COMPONENTS];
   float coupling[LB_COMPONENTS*LB_COMPONENTS];
   int remove_momentum;
-#endif // SHANCHEN  
+#endif // SHANCHEN
+
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  float elastic_coefficient;
+  float memory_time;
+#endif
 
 } LB_parameters_gpu;
 
@@ -195,6 +200,9 @@ typedef struct {
   // However, LBM wants to reset them immediately after the LBM update
   // This variable keeps a backup
   lbForceFloat *force_buf;
+#endif
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  lbForceFloat *maxwell_stress;
 #endif
 
 } LB_node_force_gpu;

@@ -134,8 +134,14 @@ LB_parameters_gpu lbpar_gpu = {
   // coupling
   SC20,
   // remove_momentum
-  0
+  0,
 #endif // SHANCHEN  
+#ifdef LB_MAXWELL_VISCOELASTICITY
+  // elastic_coefficient
+  0.0,
+  // memory_time
+  1.0
+#endif
 };
 
 
