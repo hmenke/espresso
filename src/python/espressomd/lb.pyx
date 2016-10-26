@@ -57,7 +57,7 @@ IF LB_GPU or LB:
         # list of valid keys for parameters
         ####################################################
         def valid_keys(self):
-            return "agrid", "dens", "fric", "ext_force", "visc", "tau"
+            return "agrid", "dens", "fric", "ext_force", "visc", "tau", "elastic_coefficient", "memory_time"
 
         # list of esential keys required for the fluid
         ####################################################
@@ -67,22 +67,25 @@ IF LB_GPU or LB:
         # list of default parameters
         ####################################################
         def default_params(self):
+            params = {"agrid": -1.0,
+                      "dens": -1.0,
+                      "fric": -1.0,
+                      "ext_force": [0.0, 0.0, 0.0],
+                      "visc": -1.0,
+                      "bulk_visc": -1.0,
+                      "tau": -1.0}
+
             IF SHANCHEN:
-                return {"agrid": -1.0,
-                        "dens": [-1.0, -1.0],
-                        "fric": [-1.0, -1.0],
-                        "ext_force": [0.0, 0.0, 0.0],
-                        "visc": [-1.0, -1.0],
-                        "bulk_visc": [-1.0, -1.0],
-                        "tau": -1.0}
-            ELSE:
-                return {"agrid": -1.0,
-                        "dens": -1.0,
-                        "fric": -1.0,
-                        "ext_force": [0.0, 0.0, 0.0],
-                        "visc": -1.0,
-                        "bulk_visc": -1.0,
-                        "tau": -1.0}
+                params["dens"] = [-1.0, -1.0],
+                params["fric"] = [-1.0, -1.0],
+                params["visc"] = [-1.0, -1.0],
+                params["bulk_visc"] = [-1.0, -1.0],
+
+            IF LB_MAXWELL_VISCOELASTICITY:
+                params["elastic_coefficient"] = 0
+                params["memory_time"] = 1
+
+            return params
 
         # function that calls wrapper functions which set the parameters at C-Level
         ####################################################
@@ -117,6 +120,13 @@ IF LB_GPU or LB:
                 if python_lbfluid_set_ext_force(self._params["ext_force"]):
                     raise Exception("lb_lbfluid_set_ext_force error")
 
+            IF LB_MAXWELL_VISCOELASTICITY:
+                if python_lbfluid_set_elastic_coefficient(self._params["elastic_coefficient"]):
+                    raise Exception("lb_lbfluid_set_elastic_coefficient error")
+
+                if python_lbfluid_set_memory_time(self._params["memory_time"]):
+                    raise Exception("lb_lbfluid_set_memory_time error")
+
         # function that calls wrapper functions which get the parameters from C-Level
         ####################################################
         def _get_params_from_es_core(self):
@@ -145,6 +155,13 @@ IF LB_GPU or LB:
             if not self._params["ext_force"] == default_params["ext_force"]:
                 if python_lbfluid_get_ext_force(self._params["ext_force"]):
                     raise Exception("lb_lbfluid_set_ext_force error")
+
+            IF LB_MAXWELL_VISCOELASTICITY:
+                if python_lbfluid_get_elastic_coefficient(self._params["elastic_coefficient"]):
+                    raise Exception("lb_lbfluid_get_elastic_coefficient error")
+
+                if python_lbfluid_get_memory_time(self._params["memory_time"]):
+                    raise Exception("lb_lbfluid_get_memory_time error")
 
             return self._params
 
