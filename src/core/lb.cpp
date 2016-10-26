@@ -556,7 +556,35 @@ int lb_lbfluid_set_memory_time(double p_memory_time){
   }
   return 0;
 }
-#endif
+
+
+int lb_lbfluid_get_elastic_coefficient(double *p_elastic_coefficient){
+  if (lattice_switch & LATTICE_LB_GPU) {
+#ifdef LB_GPU
+    *p_elastic_coefficient = lbpar_gpu.elastic_coefficient;
+#endif // LB_GPU
+  } else {
+#ifdef LB
+    *p_elastic_coefficient = lbpar.elastic_coefficient;
+#endif // LB
+  }
+  return 0;
+}
+
+
+int lb_lbfluid_get_memory_time(double *p_memory_time){
+  if (lattice_switch & LATTICE_LB_GPU) {
+#ifdef LB_GPU
+    *p_memory_time = lbpar_gpu.memory_time;
+#endif // LB_GPU
+  } else {
+#ifdef LB
+    *p_memory_time = lbpar.memory_time;
+#endif // LB
+  }
+  return 0;
+}
+#endif // LB_MAXWELL_VISCOELASTICITY
 
 
 int lb_lbfluid_get_density(double *p_dens) {

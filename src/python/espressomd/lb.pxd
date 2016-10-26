@@ -51,6 +51,7 @@ IF LB_GPU or LB:
             double gamma_odd[2]
             double gamma_even[2]
             int resent_halo
+
 ###############################################
 #
 # init struct
@@ -96,6 +97,12 @@ IF LB_GPU or LB:
         int lb_lbnode_get_pi_neq(int * coord, double * double_return)
         int lb_lbnode_get_pop(int * coord, double * double_return)
         int lb_lbnode_get_boundary(int * coord, int * int_return)
+
+        IF LB_MAXWELL_VISCOELASTICITY:
+            int lb_lbfluid_set_elastic_coefficient(double p_elastic_coefficient)
+            int lb_lbfluid_set_memory_time(double p_memory_time)
+            int lb_lbfluid_get_elastic_coefficient(double *p_elastic_coefficient)
+            int lb_lbfluid_get_memory_time(double *p_memory_time)
 
     ###############################################
     #
@@ -222,6 +229,54 @@ IF LB_GPU or LB:
                     "lb_fluid_set_ext_force error at C-level interface")
 
         return 0
+
+###############################################
+
+    IF LB_MAXWELL_VISCOELASTICITY:
+
+        cdef inline python_lbfluid_set_elastic_coefficient(p_elastic_coefficient):
+
+            cdef double c_elastic_coefficient
+            # get pointers
+            c_elastic_coefficient = p_elastic_coefficient
+            # call c-function
+            if(lb_lbfluid_set_elastic_coefficient(c_elastic_coefficient)):
+                raise Exception("lb_lbfluid_set_elastic_coefficient error at C-level interface")
+
+            return 0
+
+        cdef inline python_lbfluid_set_memory_time(p_memory_time):
+
+            cdef double c_memory_time
+            # get pointers
+            c_memory_time = p_memory_time
+            # call c-function
+            if(lb_lbfluid_set_memory_time(c_memory_time)):
+                raise Exception("lb_lbfluid_set_memory_time error at C-level interface")
+
+            return 0
+
+        cdef inline python_lbfluid_get_elastic_coefficient(p_elastic_coefficient):
+
+            cdef double c_elastic_coefficient
+
+            if(lb_lbfluid_get_elastic_coefficient(&c_elastic_coefficient)):
+                raise Exception("lb_lbfluid_get_elastic_coefficient error at C-level interface")
+
+            p_elastic_coefficient = <double> c_elastic_coefficient
+
+            return 0
+
+        cdef inline python_lbfluid_get_memory_time(p_memory_time):
+
+            cdef double c_memory_time
+
+            if(lb_lbfluid_get_memory_time(&c_memory_time)):
+                raise Exception("lb_lbfluid_get_memory_time error at C-level interface")
+
+            p_memory_time = <double> c_memory_time
+
+            return 0
 
 ###############################################
 

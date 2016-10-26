@@ -542,6 +542,8 @@ int lb_lbfluid_set_mobility(double * p_mobility);
 #ifdef LB_MAXWELL_VISCOELASTICITY
 int lb_lbfluid_set_elastic_coefficient(double p_elastic_coefficient);
 int lb_lbfluid_set_memory_time(double p_memory_time);
+int lb_lbfluid_get_elastic_coefficient(double *p_elastic_coefficient);
+int lb_lbfluid_get_memory_time(double *p_memory_time);
 #endif
 int lb_set_lattice_switch(int py_switch);
 int lb_get_lattice_switch(int* py_switch);
