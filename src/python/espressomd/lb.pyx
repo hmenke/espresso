@@ -78,10 +78,12 @@ IF LB_GPU or LB:
             params = {"agrid": -1.0,
                       "dens": -1.0,
                       "fric": -1.0,
-                      "ext_force": [0.0, 0.0, 0.0],
                       "visc": -1.0,
                       "bulk_visc": -1.0,
                       "tau": -1.0}
+
+            IF EXTERNAL_FORCES:
+                params["ext_force"] = [0.0, 0.0, 0.0]
 
             IF SHANCHEN:
                 params["dens"] = [-1.0, -1.0],
@@ -124,7 +126,7 @@ IF LB_GPU or LB:
                 if python_lbfluid_set_friction(self._params["fric"]):
                     raise Exception("lb_lbfluid_set_friction error")
 
-            if not self._params["ext_force"] == default_params["ext_force"]:
+            IF EXTERNAL_FORCES:
                 if python_lbfluid_set_ext_force(self._params["ext_force"]):
                     raise Exception("lb_lbfluid_set_ext_force error")
 
@@ -160,7 +162,7 @@ IF LB_GPU or LB:
                 if python_lbfluid_get_friction(self._params["fric"]):
                     raise Exception("lb_lbfluid_set_friction error")
 
-            if not self._params["ext_force"] == default_params["ext_force"]:
+            IF EXTERNAL_FORCES:
                 if python_lbfluid_get_ext_force(self._params["ext_force"]):
                     raise Exception("lb_lbfluid_set_ext_force error")
 

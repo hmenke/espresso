@@ -213,22 +213,24 @@ IF LB_GPU or LB:
 
 ###############################################
 
-    cdef inline python_lbfluid_set_ext_force(p_ext_force):
+    IF EXTERNAL_FORCES:
 
-        cdef double c_ext_force[3]
-        # get pointers
-        c_ext_force = p_ext_force
-        # call c-function
-        IF SHANCHEN:
-            if(lb_lbfluid_set_ext_force(1, c_ext_force[0], c_ext_force[1], c_ext_force[2])):
-                raise Exception(
-                    "lb_fluid_set_ext_force error at C-level interface")
-        ELSE:
-            if(lb_lbfluid_set_ext_force(0, c_ext_force[0], c_ext_force[1], c_ext_force[2])):
-                raise Exception(
-                    "lb_fluid_set_ext_force error at C-level interface")
+        cdef inline python_lbfluid_set_ext_force(p_ext_force):
 
-        return 0
+            cdef double c_ext_force[3]
+            # get pointers
+            c_ext_force = p_ext_force
+            # call c-function
+            IF SHANCHEN:
+                if(lb_lbfluid_set_ext_force(1, c_ext_force[0], c_ext_force[1], c_ext_force[2])):
+                    raise Exception(
+                        "lb_fluid_set_ext_force error at C-level interface")
+            ELSE:
+                if(lb_lbfluid_set_ext_force(0, c_ext_force[0], c_ext_force[1], c_ext_force[2])):
+                    raise Exception(
+                        "lb_fluid_set_ext_force error at C-level interface")
+
+            return 0
 
 ###############################################
 
@@ -379,13 +381,14 @@ IF LB_GPU or LB:
 
 ###############################################
 
-    cdef inline python_lbfluid_get_ext_force(p_ext_force):
+    IF EXTERNAL_FORCES:
+        cdef inline python_lbfluid_get_ext_force(p_ext_force):
 
-        cdef double c_ext_force[3]
-        # call c-function
-        if(lb_lbfluid_get_ext_force(c_ext_force)):
-            raise Exception(
-                "lb_fluid_get_ext_force error at C-level interface")
-        p_ext_force = c_ext_force
+            cdef double c_ext_force[3]
+            # call c-function
+            if(lb_lbfluid_get_ext_force(c_ext_force)):
+                raise Exception(
+                    "lb_fluid_get_ext_force error at C-level interface")
+            p_ext_force = c_ext_force
 
-        return 0
+            return 0

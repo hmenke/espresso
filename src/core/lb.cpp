@@ -523,7 +523,7 @@ int lb_lbfluid_set_ext_force(int component, double p_fx, double p_fy, double p_f
 
 #ifdef LB_MAXWELL_VISCOELASTICITY
 int lb_lbfluid_set_elastic_coefficient(double p_elastic_coefficient){
-  if ( p_elastic_coefficient <= 0 )
+  if ( p_elastic_coefficient < 0 )
     return -1;
   if (lattice_switch & LATTICE_LB_GPU) {
 #ifdef LB_GPU
@@ -541,7 +541,7 @@ int lb_lbfluid_set_elastic_coefficient(double p_elastic_coefficient){
 
 
 int lb_lbfluid_set_memory_time(double p_memory_time){
-  if ( p_memory_time <= 0 )
+  if ( p_memory_time <= 0 ) // prevent division by zero
     return -1;
   if (lattice_switch & LATTICE_LB_GPU) {
 #ifdef LB_GPU
