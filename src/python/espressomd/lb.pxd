@@ -104,6 +104,9 @@ IF LB_GPU or LB:
             int lb_lbfluid_get_elastic_coefficient(double *p_elastic_coefficient)
             int lb_lbfluid_get_memory_time(double *p_memory_time)
 
+    cdef extern from "lbgpu.hpp":
+        int lb_lbfluid_remove_total_momentum();
+
     ###############################################
     #
     # Wrapper-functions for access to C-pointer: Set params
