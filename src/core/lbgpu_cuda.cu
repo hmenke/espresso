@@ -305,7 +305,10 @@ __device__ void index_to_xyz(unsigned int index, unsigned int *xyz){
  * @param index   Calculated node index / thread index (Output)
  */
 __device__ unsigned int xyz_to_index(unsigned int *xyz){
-  return para.dim_y*(xyz[0]*para.dim_x + xyz[1]) + xyz[2];
+  unsigned int x = (xyz[0] + para.dim_x) % para.dim_x;
+  unsigned int y = (xyz[1] + para.dim_y) % para.dim_y;
+  unsigned int z = (xyz[2] + para.dim_z) % para.dim_z;
+  return para.dim_y*(x*para.dim_x + y) + z;
 }
 
 
