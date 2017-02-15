@@ -291,7 +291,8 @@ __device__ void random_wrapper(LB_randomnr_gpu *rn) {
  * @param index   node index / thread index (Input)
  * @param xyz     Pointer to calculated xyz array (Output)
  */
-__device__ void index_to_xyz(unsigned int index, unsigned int *xyz){
+template < typename T >
+__device__ void index_to_xyz(T index, T* xyz){
   xyz[0] = index%para.dim_x;
   index /= para.dim_x;
   xyz[1] = index%para.dim_y;
@@ -304,11 +305,12 @@ __device__ void index_to_xyz(unsigned int index, unsigned int *xyz){
  * @param xyz     Pointer xyz array (Input)
  * @param index   Calculated node index / thread index (Output)
  */
-__device__ unsigned int xyz_to_index(unsigned int *xyz){
-  unsigned int x = (xyz[0] + para.dim_x) % para.dim_x;
-  unsigned int y = (xyz[1] + para.dim_y) % para.dim_y;
-  unsigned int z = (xyz[2] + para.dim_z) % para.dim_z;
-  return para.dim_y*(x*para.dim_x + y) + z;
+template < typename T >
+__device__ T xyz_to_index(T* xyz){
+  T x = (xyz[0] + para.dim_x) % para.dim_x;
+  T y = (xyz[1] + para.dim_y) % para.dim_y;
+  T z = (xyz[2] + para.dim_z) % para.dim_z;
+  return x + para.dim_x*(y + para.dim_y*z);
 }
 
 
@@ -1216,13 +1218,16 @@ __device__ void apply_forces(unsigned int index, float *mode, LB_node_force_gpu 
   #pragma unroll
   for (int ii=1; ii<7; ii++)
   {
-    unsigned int xyz[3];
-    index_to_xyz(index, xyz);
-    xyz[0] += d3q19_lattice[ii][0];
-    xyz[1] += d3q19_lattice[ii][1];
-    xyz[2] += d3q19_lattice[ii][2];
+    unsigned int get_xyz[3];
+    index_to_xyz(index, get_xyz);
+    long xyz[3] = {
+      get_xyz[0] + d3q19_lattice[ii][0],
+      get_xyz[1] + d3q19_lattice[ii][1],
+      get_xyz[2] + d3q19_lattice[ii][2]
+    };
 
-    float *uu = d_v[xyz_to_index(xyz)].v;
+    long neighbor = xyz_to_index(xyz);
+    float *uu = d_v[neighbor].v;
     laplace_u[0] += 1.0f/(3.0f*agrid2) * uu[0];
     laplace_u[1] += 1.0f/(3.0f*agrid2) * uu[1];
     laplace_u[2] += 1.0f/(3.0f*agrid2) * uu[2];
@@ -1231,13 +1236,16 @@ __device__ void apply_forces(unsigned int index, float *mode, LB_node_force_gpu 
   #pragma unroll
   for (int ii=7; ii<19; ii++)
   {
-    unsigned int xyz[3];
-    index_to_xyz(index, xyz);
-    xyz[0] += d3q19_lattice[ii][0];
-    xyz[1] += d3q19_lattice[ii][1];
-    xyz[2] += d3q19_lattice[ii][2];
+    unsigned int get_xyz[3];
+    index_to_xyz(index, get_xyz);
+    long xyz[3] = {
+      get_xyz[0] + d3q19_lattice[ii][0],
+      get_xyz[1] + d3q19_lattice[ii][1],
+      get_xyz[2] + d3q19_lattice[ii][2]
+    };
 
-    float *uu = d_v[xyz_to_index(xyz)].v;
+    long neighbor = xyz_to_index(xyz);
+    float *uu = d_v[neighbor].v;
     laplace_u[0] += 1.0f/(6.0f*agrid2) * uu[0];
     laplace_u[1] += 1.0f/(6.0f*agrid2) * uu[1];
     laplace_u[2] += 1.0f/(6.0f*agrid2) * uu[2];
