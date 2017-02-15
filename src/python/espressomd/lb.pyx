@@ -66,7 +66,7 @@ IF LB_GPU or LB:
         # list of valid keys for parameters
         ####################################################
         def valid_keys(self):
-            return "agrid", "dens", "fric", "ext_force", "visc", "tau", "elastic_coefficient", "memory_time"
+            return "agrid", "dens", "fric", "ext_force", "visc", "tau", "couple", "elastic_coefficient", "memory_time"
 
         # list of esential keys required for the fluid
         ####################################################
@@ -81,7 +81,8 @@ IF LB_GPU or LB:
                       "fric": -1.0,
                       "visc": -1.0,
                       "bulk_visc": -1.0,
-                      "tau": -1.0}
+                      "tau": -1.0,
+                      "couple": "2pt"}
 
             IF EXTERNAL_FORCES:
                 params["ext_force"] = [0.0, 0.0, 0.0]
@@ -131,6 +132,10 @@ IF LB_GPU or LB:
                 if python_lbfluid_set_ext_force(self._params["ext_force"]):
                     raise Exception("lb_lbfluid_set_ext_force error")
 
+            if not self._params["couple"] == default_params["couple"]:
+                if python_lbfluid_set_couple_flag(self._params["couple"]):
+                    raise Exception("lb_lbfluid_set_couple_flag error")
+
             IF LB_MAXWELL_VISCOELASTICITY:
                 if python_lbfluid_set_elastic_coefficient(self._params["elastic_coefficient"]):
                     raise Exception("lb_lbfluid_set_elastic_coefficient error")
@@ -166,6 +171,10 @@ IF LB_GPU or LB:
             IF EXTERNAL_FORCES:
                 if python_lbfluid_get_ext_force(self._params["ext_force"]):
                     raise Exception("lb_lbfluid_set_ext_force error")
+
+            if not self._params["couple"] == default_params["couple"]:
+                if python_lbfluid_get_couple_flag(self._params["couple"]):
+                    raise Exception("lb_lbfluid_get_couple_flag error")
 
             IF LB_MAXWELL_VISCOELASTICITY:
                 if python_lbfluid_get_elastic_coefficient(self._params["elastic_coefficient"]):
