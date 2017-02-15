@@ -4274,4 +4274,83 @@ void lb_lbfluid_fluid_add_momentum( float momentum_host[3] )
 }
 
 
+/**set the populations of a specific node on the GPU
+ * @param n_a            Pointer to local node residing in array a (Input)
+ * @param population     Pointer to new population (Input)
+ * @param x              x-coordinate of node (Input)
+ * @param y              y-coordinate of node (Input)
+ * @param z              z-coordinate of node (Input)
+ * @param c              LB component (for SHANCHEN) (Input)
+*/
+__global__ void lb_lbfluid_set_population_kernel(LB_nodes_gpu n_a, float population[LBQ], int x, int y, int z, int c)
+{
+  int xyz[3] = { x, y, z };
+  int index = xyz_to_index( xyz );
+
+  for (int i = 0; i < LBQ; ++i)
+  {
+    n_a.vd[( i + c*LBQ ) * para.number_of_nodes + index] = population[i];
+  }
+}
+
+
+/**interface to set the populations of a specific node for the GPU
+ * @param xyz            coordinates of node (Input)
+ * @param population     Pointer to population (Input)
+ * @param c              LB component (for SHANCHEN) (Input)
+*/
+void lb_lbfluid_set_population( int xyz[3], float population_host[LBQ], int c )
+{
+  float* population_device;
+  cuda_safe_mem(cudaMalloc((void**)&population_device,LBQ*sizeof(float)));
+  cuda_safe_mem(cudaMemcpy(population_device, population_host, LBQ*sizeof(float), cudaMemcpyHostToDevice));
+
+  dim3 dim_grid = make_uint3(1, 1, 1);
+  KERNELCALL( lb_lbfluid_set_population_kernel, dim_grid, 1,
+              (*current_nodes, population_device, xyz[0], xyz[1], xyz[2], c));
+
+  cuda_safe_mem(cudaFree(population_device));
+}
+
+
+/**get the populations of a specific node on the GPU
+ * @param n_a            Pointer to local node residing in array a (Input)
+ * @param population     Pointer to population (Output)
+ * @param x              x-coordinate of node (Input)
+ * @param y              y-coordinate of node (Input)
+ * @param z              z-coordinate of node (Input)
+ * @param c              LB component (for SHANCHEN) (Input)
+*/
+__global__ void lb_lbfluid_get_population_kernel(LB_nodes_gpu n_a, float population[LBQ], int x, int y, int z, int c)
+{
+  int xyz[3] = { x, y, z };
+  int index = xyz_to_index( xyz );
+
+  for (int i = 0; i < LBQ; ++i)
+  {
+    population[i] = n_a.vd[( i + c*LBQ ) * para.number_of_nodes + index];
+  }
+}
+
+
+/**interface to get the populations of a specific node for the GPU
+ * @param xyz            coordinates of node (Input)
+ * @param population     Pointer to population (Output)
+ * @param c              LB component (for SHANCHEN) (Input)
+*/
+void lb_lbfluid_get_population( int xyz[3], float population_host[LBQ], int c )
+{
+  float* population_device;
+  cuda_safe_mem(cudaMalloc((void**)&population_device,LBQ*sizeof(float)));
+
+  dim3 dim_grid = make_uint3(1, 1, 1);
+  KERNELCALL( lb_lbfluid_get_population_kernel, dim_grid, 1,
+              (*current_nodes, population_device, xyz[0], xyz[1], xyz[2], c));
+
+  cuda_safe_mem(cudaMemcpy(population_host, population_device, LBQ*sizeof(float), cudaMemcpyDeviceToHost));
+
+  cuda_safe_mem(cudaFree(population_device));
+}
+
+
 #endif /* LB_GPU */
