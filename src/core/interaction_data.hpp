@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010,2011,2012,2013,2014 The ESPResSo project
+  Copyright (C) 2010,2011,2012,2013,2014,2015,2016 The ESPResSo project
   Copyright (C) 2002,2003,2004,2005,2006,2007,2008,2009,2010 
     Max-Planck-Institute for Polymer Research, Theory Group
   
@@ -99,9 +99,9 @@ enum BondedInteraction{
 /** Specify tabulated bonded interactions  */
 enum TabulatedBondedInteraction{
     TAB_UNKNOWN = 0,
-    TAB_BOND_LENGTH,
-    TAB_BOND_ANGLE,
-    TAB_BOND_DIHEDRAL
+    TAB_BOND_LENGTH = 1,
+    TAB_BOND_ANGLE = 2,
+    TAB_BOND_DIHEDRAL = 3
 };
 
 /** Specify overlapped bonded interactions  */
@@ -140,6 +140,7 @@ enum OverlappedBondedInteraction{
 		COULOMB_MMM1D_GPU, //< Coulomb method is one-dimensional MMM running on GPU
 		COULOMB_EWALD_GPU, //< Coulomb method is Ewald running on GPU
                 COULOMB_EK, //< Coulomb method is electrokinetics
+                COULOMB_SCAFACOS, //< Coulomb method is scafacos
 	};
 
 #endif
@@ -167,7 +168,10 @@ enum DipolarInteraction{
    /** Dipolar method is direct sum plus DLC. */
     DIPOLAR_MDLC_DS,
    /** Direct summation on gpu */
-   DIPOLAR_DS_GPU 
+   DIPOLAR_DS_GPU,
+  /** Scafacos library */
+  DIPOLAR_SCAFACOS
+
 
    };
 #endif 
@@ -200,8 +204,6 @@ enum ConstraintApplied{
 /** External magnetic field constraint applied */
     CONSTRAINT_EXT_MAGN_FIELD,
 //end ER
-/** Constraint for tunable-lsip boundary conditions */
-    CONSTRAINT_PLANE,
 /** Constraint for tunable-lsip boundary conditions */
     CONSTRAINT_RHOMBOID,
 /** Constraint for a stomatocyte boundary */
@@ -1127,12 +1129,6 @@ typedef struct{
 } Constraint_ext_magn_field;
 //end ER
 
-/** Parameters for a plane constraint which is needed for tunable-slip boundary conditions. */
-typedef struct {
-  /** Position of the plain. Negative values mean non-existing in that direction. */
-  double pos[3];
-} Constraint_plane;
-
 typedef struct {
   double omega;
   double Prefactor;
@@ -1160,7 +1156,6 @@ typedef struct {
     //ER
     Constraint_ext_magn_field emfield;
     //end ER
-    Constraint_plane plane;
   } c;
 
   /** particle representation of this constraint. Actually needed are only the identity,
@@ -1199,6 +1194,14 @@ extern double max_cut;
 extern double max_cut_nonbonded;
 /** Maximal interaction cutoff (real space/short range bonded interactions). */
 extern double max_cut_bonded;
+/** Cutoff of coulomb real space part */
+extern double coulomb_cutoff;
+/** Cutoff of dipolar real space part */
+extern double dipolar_cutoff;
+
+
+
+
 /** Minimal global interaction cutoff. Particles with a distance
     smaller than this are guaranteed to be available on the same node
     (through ghosts).  */

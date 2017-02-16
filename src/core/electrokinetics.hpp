@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2010,2011,2012,2014 The ESPResSo project
+   Copyright (C) 2010,2011,2012,2014,2015,2016 The ESPResSo project
 
    This file is part of ESPResSo.
   
@@ -186,7 +186,7 @@ int ek_node_print_velocity(int x, int y, int z, double* velocity);
 int ek_node_print_density(int species, int x, int y, int z, double* density);
 int ek_node_print_flux(int species, int x, int y, int z, double* flux);
 int ek_node_set_density(int species, int x, int y, int z, double density);
-float ek_calculate_net_charge(); 
+ekfloat ek_calculate_net_charge(); 
 int ek_neutralize_system(int species); 
 int ek_save_checkpoint(char* filename);
 int ek_load_checkpoint(char* filename);

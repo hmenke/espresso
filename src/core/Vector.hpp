@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2014 The ESPResSo project
+  Copyright (C) 2014,2015,2016 The ESPResSo project
   
   This file is part of ESPResSo.
   
@@ -18,9 +18,7 @@
 */
 #include <algorithm>
 #include <cmath>
-#ifdef HAVE_CXX11
 #include <initializer_list>
-#endif
 
 /* @TODO: should have move semantics with c++11 for peformance reasons. */
 

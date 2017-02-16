@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010,2011,2012,2013,2014 The ESPResSo project
+  Copyright (C) 2010,2011,2012,2013,2014,2015,2016 The ESPResSo project
   Copyright (C) 2002,2003,2004,2005,2006,2007,2008,2009,2010 
     Max-Planck-Institute for Polymer Research, Theory Group
   
@@ -244,7 +244,7 @@ void calculate_spherocylinder_dist(Particle *p1, double ppos[3], Particle *c_p, 
     d += ppos_local[i] * c->axis[i];
   }
 
-  if(abs(d) >= c->length) {
+  if(fabs(d) >= c->length) {
     *dist = 0.0;
     
     for(i = 0; i < 3; i++) {
@@ -841,7 +841,7 @@ void calculate_rhomboid_dist(Particle *p1, double ppos[3], Particle *c_p, Constr
 	tmp = sqrt( axc[0]*axc[0] + axc[1]*axc[1] + axc[2]*axc[2] );
 	d /= tmp;
 	
-	if(abs(d) < abs(*dist))
+	if(fabs(d) < fabs(*dist))
 	{
 		vec[0] = d * axc[0]/tmp;
 		vec[1] = d * axc[1]/tmp;
@@ -857,7 +857,7 @@ void calculate_rhomboid_dist(Particle *p1, double ppos[3], Particle *c_p, Constr
 	tmp = sqrt( bxc[0]*bxc[0] + bxc[1]*bxc[1] + bxc[2]*bxc[2] );
 	d /= tmp;
 
-	if(abs(d) < abs(*dist))
+	if(fabs(d) < fabs(*dist))
 	{							
 		vec[0] = -d * bxc[0]/tmp;
 		vec[1] = -d * bxc[1]/tmp;
@@ -872,7 +872,7 @@ void calculate_rhomboid_dist(Particle *p1, double ppos[3], Particle *c_p, Constr
 	tmp = sqrt( axb[0]*axb[0] + axb[1]*axb[1] + axb[2]*axb[2] );
 	d /= tmp;
 	
-	if(abs(d) < abs(*dist))
+	if(fabs(d) < fabs(*dist))
 	{																					
 		vec[0] = d * axb[0]/tmp;
 		vec[1] = d * axb[1]/tmp;
@@ -888,7 +888,7 @@ void calculate_rhomboid_dist(Particle *p1, double ppos[3], Particle *c_p, Constr
 	tmp = sqrt( axc[0]*axc[0] + axc[1]*axc[1] + axc[2]*axc[2] );
 	d /= tmp;
 
-	if(abs(d) < abs(*dist))
+	if(fabs(d) < fabs(*dist))
 	{																						
 		vec[0] = -d * axc[0]/tmp;
 		vec[1] = -d * axc[1]/tmp;
@@ -903,7 +903,7 @@ void calculate_rhomboid_dist(Particle *p1, double ppos[3], Particle *c_p, Constr
 	tmp = sqrt( bxc[0]*bxc[0] + bxc[1]*bxc[1] + bxc[2]*bxc[2] );
 	d /= tmp;
 
-	if(abs(d) < abs(*dist))
+	if(fabs(d) < fabs(*dist))
 	{																						
 		vec[0] = d * bxc[0]/tmp;
 		vec[1] = d * bxc[1]/tmp;
@@ -1123,30 +1123,6 @@ void calculate_pore_dist(Particle *p1, double ppos[3], Particle *c_p, Constraint
   *dist=-1e99;
   vec[0] = vec[1] = vec[2] = 1e99;
 //  exit(printf("should never be reached, z %f, r%f\n",z, r));
-}
-
-void calculate_plane_dist(Particle *p1, double ppos[3], Particle *c_p, Constraint_plane *c, double *dist, double *vec)
-{
-  int i;
-  double c_dist_sqr,c_dist;
-  
-  c_dist_sqr=0.0;
-  for(i=0;i<3;i++) {
-    if(c->pos[i] >= 0) {
-      vec[i] = c->pos[i] - ppos[i];
-      c_dist_sqr += SQR(vec[i]);
-    }else{
-      vec[i] = 0.0;
-      c_dist_sqr += SQR(vec[i]);
-    }
-  }
-  c_dist = sqrt(c_dist_sqr);
-  *dist = c_dist;
-
-  
-  for(i=0;i<3;i++) {
-    vec[i] *= -1;
-  }
 }
 
 void calculate_stomatocyte_dist( Particle *p1, double ppos [3], 
@@ -2408,10 +2384,8 @@ void add_constraints_forces(Particle *p1)
 	else {
 	  if(constraints[n].c.wal.reflecting){
 	    reflect_particle(p1, &(vec[0]), constraints[n].c.wal.reflecting);
-      } else {
-        ostringstream msg;
-        msg <<"wall constraint "<< n<<" violated by particle "<<p1->p.identity;
-        runtimeError(msg);
+          } else {
+            runtimeErrorMsg() <<"wall constraint "<< n<<" violated by particle "<<p1->p.identity;
 	  }
 	}
       }
@@ -2435,10 +2409,8 @@ void add_constraints_forces(Particle *p1)
 	else {
 	  if(constraints[n].c.sph.reflecting){
 	    reflect_particle(p1, &(vec[0]), constraints[n].c.sph.reflecting);
-      } else {
-        ostringstream msg;
-        msg << "sphere constraint "<< n <<" violated by particle "<<p1->p.identity;
-        runtimeError(msg);
+          } else {
+            runtimeErrorMsg() << "sphere constraint "<< n <<" violated by particle "<<p1->p.identity;
 	  }
 	}
       }
@@ -2455,18 +2427,16 @@ void add_constraints_forces(Particle *p1)
 	else if ( dist <= 0 && constraints[n].c.cyl.penetrable == 1 ) {
 	  if ( dist < 0 ) {
 	    calc_non_bonded_pair_force(p1, &constraints[n].part_rep,
-				     ia_params,vec,-1.0*dist,dist*dist, force,
-				     torque1, torque2);
+                                       ia_params,vec,-1.0*dist,dist*dist, force,
+                                       torque1, torque2);
 	  }
 	}
 	else {
-    if(constraints[n].c.cyl.reflecting){
-      reflect_particle(p1, &(vec[0]), constraints[n].c.cyl.reflecting);
-    } else {
-      ostringstream msg;
-      msg << "cylinder constraint "<< n << " violated by particle "<< p1->p.identity;
-      runtimeError(msg);
-    }
+          if(constraints[n].c.cyl.reflecting){
+            reflect_particle(p1, &(vec[0]), constraints[n].c.cyl.reflecting);
+          } else {
+            runtimeErrorMsg() << "cylinder constraint "<< n << " violated by particle "<< p1->p.identity;
+          }
         }
       }
       break;
@@ -2487,13 +2457,11 @@ void add_constraints_forces(Particle *p1)
 	  }
 	}
 	else {
-    if(constraints[n].c.rhomboid.reflecting){
-      reflect_particle(p1, &(vec[0]), constraints[n].c.rhomboid.reflecting);
-    } else {
-      ostringstream msg;
-      msg << "rhomboid constraint " << n << " violated by particle " << p1->p.identity;
-      runtimeError(msg);
-    }
+          if(constraints[n].c.rhomboid.reflecting){
+            reflect_particle(p1, &(vec[0]), constraints[n].c.rhomboid.reflecting);
+          } else {
+            runtimeErrorMsg() << "rhomboid constraint " << n << " violated by particle " << p1->p.identity;
+          }
         }
       }
       break;
@@ -2513,10 +2481,8 @@ void add_constraints_forces(Particle *p1)
 				     torque1, torque2);
 	  }
 	}
-    else {
-      ostringstream msg;
-      msg <<"maze constraint " << n << " violated by particle "<< p1->p.identity;
-      runtimeError(msg);
+        else {
+          runtimeErrorMsg() <<"maze constraint " << n << " violated by particle "<< p1->p.identity;
 	}
       }
       break;
@@ -2533,9 +2499,7 @@ void add_constraints_forces(Particle *p1)
     if(constraints[n].c.pore.reflecting){
       reflect_particle(p1, &(vec[0]), constraints[n].c.pore.reflecting);
     } else {
-      ostringstream msg;
-      msg <<"pore constraint " << n << " violated by particle "<< p1->p.identity;
-      runtimeError(msg);
+      runtimeErrorMsg() <<"pore constraint " << n << " violated by particle "<< p1->p.identity;
         }
       }
       }
@@ -2552,9 +2516,7 @@ void add_constraints_forces(Particle *p1)
     if(constraints[n].c.pore.reflecting){
       reflect_particle(p1, &(vec[0]), constraints[n].c.pore.reflecting);
     } else {
-      ostringstream msg;
-      msg <<"pore constraint " << n << " violated by particle  "<< p1->p.identity;
-      runtimeError(msg);
+      runtimeErrorMsg() <<"pore constraint " << n << " violated by particle  "<< p1->p.identity;
         }
       }
       }
@@ -2590,9 +2552,7 @@ void add_constraints_forces(Particle *p1)
           } 
           else
           {
-              ostringstream msg;
-              msg <<"stomatocyte constraint "<< n << " violated by particle " << p1->p.identity;
-              runtimeError(msg);
+              runtimeErrorMsg() <<"stomatocyte constraint "<< n << " violated by particle " << p1->p.identity;
           }
 	      }
       }
@@ -2629,9 +2589,7 @@ void add_constraints_forces(Particle *p1)
           } 
           else
           {
-              ostringstream msg;
-              msg <<"hollow_cone constraint "<< n << " violated by particle " << p1->p.identity;
-              runtimeError(msg);
+              runtimeErrorMsg() <<"hollow_cone constraint "<< n << " violated by particle " << p1->p.identity;
           }
 	      }
       }
@@ -2646,9 +2604,7 @@ void add_constraints_forces(Particle *p1)
 				     torque1, torque2);
 	}
 	else {
-        ostringstream msg;
-        msg << "voxel constraint "<< n <<" violated by particle "<<p1->p.identity;
-        runtimeError(msg);
+        runtimeErrorMsg() << "voxel constraint "<< n <<" violated by particle "<<p1->p.identity;
 	}
       }
       break;
@@ -2667,25 +2623,6 @@ void add_constraints_forces(Particle *p1)
       add_ext_magn_field_force(p1, &constraints[n].c.emfield);
       break;
 #endif
-    
-    case CONSTRAINT_PLANE:
-     if(checkIfInteraction(ia_params)) {
-	calculate_plane_dist(p1, folded_pos, &constraints[n].part_rep, &constraints[n].c.plane, &dist, vec); 
-	if (dist > 0) {
-	    calc_non_bonded_pair_force(p1, &constraints[n].part_rep,
-				       ia_params,vec,dist,dist*dist, force,
-				       torque1, torque2);
-#ifdef TUNABLE_SLIP
-	    add_tunable_slip_pair_force(p1, &constraints[n].part_rep,ia_params,vec,dist,force);
-#endif
-	}
-    else {
-        ostringstream msg;
-        msg <<"plane constraint " << n << " violated by particle " << p1->p.identity;
-        runtimeError(msg);
-	}
-     }
-      break;
     case CONSTRAINT_NONE:
       force[0] = force[1] = force[2] = 0.0;
       break;
@@ -2740,9 +2677,7 @@ double add_constraints_energy(Particle *p1)
 	  }
 	}
     else {
-        ostringstream msg;
-        msg <<"wall constraint "<< n << " violated by particle "<< p1->p.identity;
-        runtimeError(msg);
+        runtimeErrorMsg() <<"wall constraint "<< n << " violated by particle "<< p1->p.identity;
 	}
       }
       break;
@@ -2761,9 +2696,7 @@ double add_constraints_energy(Particle *p1)
 	  }
 	}
     else {
-        ostringstream msg;
-        msg << "sphere constraint "<< n << " violated by particle " << p1->p.identity;
-        runtimeError(msg);
+        runtimeErrorMsg() << "sphere constraint "<< n << " violated by particle " << p1->p.identity;
 	}
       }
       break;
@@ -2783,9 +2716,7 @@ double add_constraints_energy(Particle *p1)
 	  }
 	}
     else {
-        ostringstream msg;
-        msg <<"cylinder constraint "<< n << " violated by particle " << p1->p.identity;
-        runtimeError(msg);
+        runtimeErrorMsg() <<"cylinder constraint "<< n << " violated by particle " << p1->p.identity;
 	}
       }
       break;
@@ -2805,9 +2736,7 @@ double add_constraints_energy(Particle *p1)
 	  }
 	}
     else {
-        ostringstream msg;
-        msg <<"cylinder constraint  " << n << " violated by particle " << p1->p.identity;
-        runtimeError(msg);
+        runtimeErrorMsg() <<"cylinder constraint  " << n << " violated by particle " << p1->p.identity;
 	}
       }
       break;
@@ -2826,9 +2755,7 @@ double add_constraints_energy(Particle *p1)
 	  }
 	}
     else {
-        ostringstream msg;
-        msg <<"maze constraint " << n << " violated by particle " << p1->p.identity;
-        runtimeError(msg);
+        runtimeErrorMsg() <<"maze constraint " << n << " violated by particle " << p1->p.identity;
 	}
       }
       break;
@@ -2842,9 +2769,7 @@ double add_constraints_energy(Particle *p1)
 
 	}
     else {
-        ostringstream msg;
-        msg <<"pore constraint " << n << " violated by particle " << p1->p.identity;
-        runtimeError(msg);
+        runtimeErrorMsg() <<"pore constraint " << n << " violated by particle " << p1->p.identity;
 	}
       }
       break;
@@ -2874,9 +2799,7 @@ double add_constraints_energy(Particle *p1)
 	      }
 	      else
         {
-              ostringstream msg;
-              msg <<"stomatocyte constraint "<< n << " violated by particle " << p1->p.identity;
-              runtimeError(msg);
+              runtimeErrorMsg() <<"stomatocyte constraint "<< n << " violated by particle " << p1->p.identity;
 	      }
       }
     break;
@@ -2906,9 +2829,7 @@ double add_constraints_energy(Particle *p1)
 	      }
 	      else
         {
-              ostringstream msg;
-              msg <<"hollow_cone constraint " << n << " violated by particle " << p1->p.identity;
-              runtimeError(msg);
+              runtimeErrorMsg() <<"hollow_cone constraint " << n << " violated by particle " << p1->p.identity;
 	      }
       }
     break;
@@ -2923,15 +2844,10 @@ double add_constraints_energy(Particle *p1)
     case CONSTRAINT_EXT_MAGN_FIELD:
       magnetic_en = ext_magn_field_energy(p1, &constraints[n].c.emfield);
       break;
-      //@TODO: implement energy of Plane, Slitpore
-  case CONSTRAINT_PLANE:
-    {
-        if (warnings) fprintf(stderr, "WARNING: energy calculated, but PLANE energy not implemented\n");
-    }
-      break;
+      //@TODO: implement energy of Slitpore
   case CONSTRAINT_SLITPORE:
     {
-        if (warnings) fprintf(stderr, "WARNING: energy calculated, but PLANE energy not implemented\n");
+        if (warnings) fprintf(stderr, "WARNING: energy calculated, but SLITPORE energy not implemented\n");
     }
       break;
   case CONSTRAINT_VOXEL: 
@@ -2942,9 +2858,7 @@ double add_constraints_energy(Particle *p1)
 						     ia_params, vec, dist, dist*dist);
 	}
     else {
-       // ostringstream msg;
-       // msg << "voxel constraint "<< n << " violated by particle " << p1->p.identity;
-       // runtimeError(msg);
+       // runtimeErrorMsg() << "voxel constraint "<< n << " violated by particle " << p1->p.identity;
 	}
       }
       break;
