@@ -2304,8 +2304,3 @@ bool particle_exists(int part) {
         return true;
    return false;
 }
-
-#ifndef MASS
-constexpr double ParticleProperties::mass;
-#endif
-
