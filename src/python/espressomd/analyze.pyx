@@ -555,7 +555,7 @@ class Analysis:
         cdef double total_bonded
         total_bonded = 0
         for i in range(c_analyze.n_bonded_ia):
-            if (bonded_ia_params[i].type != 0):
+            if (bonded_ia_params[i].type != BONDED_IA_NONE):
                 e["bonded", i] = c_analyze.obsstat_bonded(& c_analyze.total_energy, i)[0]
                 total_bonded += c_analyze.obsstat_bonded( & c_analyze.total_energy, i)[0]
         e["bonded"] = total_bonded
@@ -644,7 +644,7 @@ class Analysis:
         if number_of_chains < 0:
             raise ValueError('number_of_chains must be greater than zero')
         c_analyze.sortPartCfg()
-        if chain_start + chain_length * number_of_chains >= len(self._system.part):
+        if chain_start + chain_length * number_of_chains > len(self._system.part):
             raise ValueError(
                 'start+number_of_chains*chain_length cannot be greater than the total number of particles.')
         c_analyze.chain_start = chain_start
