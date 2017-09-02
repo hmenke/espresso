@@ -30,6 +30,7 @@
 #include "maggs.hpp"
 #include "forces_inline.hpp"
 #include "electrokinetics.hpp"
+#include "partCfg_global.hpp"
 
 #include <cassert>
 ActorList forceActors;
@@ -212,7 +213,7 @@ espressoSystemInterface.update();
 #endif
 
 #ifdef COMFORCE
-  calc_comforce();
+  calc_comforce(partCfg());
 #endif
 
 #ifdef METADYNAMICS
@@ -365,7 +366,7 @@ void calc_long_range_forces()
 }
 
 void
-calc_non_bonded_pair_force_from_partcfg(Particle *p1, Particle *p2, IA_parameters *ia_params,
+calc_non_bonded_pair_force_from_partcfg(Particle const *p1, Particle const *p2, IA_parameters *ia_params,
                                         double d[3], double dist, double dist2,
                                         double force[3],
                                         double torque1[3], double torque2[3]) {
@@ -374,7 +375,7 @@ calc_non_bonded_pair_force_from_partcfg(Particle *p1, Particle *p2, IA_parameter
 }
 
 void
-calc_non_bonded_pair_force_from_partcfg_simple(Particle *p1, Particle *p2,
+calc_non_bonded_pair_force_from_partcfg_simple(Particle const *p1, Particle const *p2,
                                                double d[3], double dist,
                                                double dist2, double force[3]){
    IA_parameters *ia_params = get_ia_param(p1->p.type,p2->p.type);
