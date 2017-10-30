@@ -119,6 +119,7 @@ def features():
 ")
 endmacro()
 
+
 # Handle user features
 function(FEATURES)
   message(STATUS "Processing features")
@@ -136,6 +137,13 @@ function(FEATURES)
     if(FEATURE_FOUND EQUAL -1)
       message(FATAL_ERROR "No such feature ${F_NAME}")
     endif()
+
+    # IMPLIES means "require that feature and all it's requirements"
+    # TODO: Has to be made recursive
+    foreach(F_IMPL ${FEATURES_${F_NAME}_IMPLIES})
+      list(APPEND FEATURES_${F_NAME}_REQUIRES "${F_IMPL}")
+      list(APPEND FEATURES_${F_NAME}_REQUIRES "${FEATURES_${F_IMPL}_REQUIRES}")
+    endforeach()
 
     # Check whether required external features are present
     set(EXTERNAL_SATISFIED TRUE)
@@ -161,15 +169,9 @@ function(FEATURES)
       endif()
 
       # Append requirements to lists
-      if(NOT "${FEATURES_${F_NAME}_REQUIRES}" STREQUAL "")
-        list(APPEND F_REQUIRES  "${FEATURES_${F_NAME}_REQUIRES}")
-      endif()
-      if(NOT "${FEATURES_${F_NAME}_IMPLIES}" STREQUAL "")
-        list(APPEND F_IMPLIES   "${FEATURES_${F_NAME}_IMPLIES}")
-      endif()
-      if(NOT "${FEATURES_${F_NAME}_CONFLICTS}" STREQUAL "")
-        list(APPEND F_CONFLICTS "${FEATURES_${F_NAME}_CONFLICTS}")
-      endif()
+      list(APPEND F_REQUIRES  "${FEATURES_${F_NAME}_REQUIRES}")
+      list(APPEND F_IMPLIES   "${FEATURES_${F_NAME}_IMPLIES}")
+      list(APPEND F_CONFLICTS "${FEATURES_${F_NAME}_CONFLICTS}")
 
     endif(EXTERNAL_SATISFIED)
 
@@ -185,9 +187,6 @@ function(FEATURES)
   if(NOT "${F_CONFLITS}" STREQUAL "")
     list(REMOVE_DUPLICATES F_CONFLICTS)
   endif()
-
-  message("${F_DEFINED}\n")
-  message("${F_REQUIRES}")
 
   # Check for conflicting features
   foreach(F_NAME ${ARGN})
