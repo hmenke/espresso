@@ -1,0 +1,9 @@
+# minimal set of config for the tunable slip testcase
+DPD
+TRANS_DPD
+INTER_DPD
+DPD_MASS_RED
+TUNABLE_SLIP
+EXTERNAL_FORCES
+CONSTRAINTS
+LENNARD_JONES

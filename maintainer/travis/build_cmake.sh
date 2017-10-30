@@ -129,13 +129,13 @@ MYCONFIG_DIR=$srcdir/maintainer/configs
 if [ "$myconfig" = "default" ]; then
     echo "Using default myconfig."
 else
-    myconfig_file=$MYCONFIG_DIR/$myconfig.hpp
+    myconfig_file=$MYCONFIG_DIR/$myconfig.cmake
     if [ ! -e "$myconfig_file" ]; then
         echo "$myconfig_file does not exist!"
         exit 1
     fi
-    echo "Copying $myconfig.hpp to $builddir/myconfig.hpp..."
-    cp $myconfig_file $builddir/myconfig.hpp
+    echo "Copying $myconfig.cmake to $builddir/myconfig.cmake..."
+    cp $myconfig_file $builddir/myconfig.cmake
 fi
 
 cmd "cmake $cmake_params $srcdir" || exit 1
