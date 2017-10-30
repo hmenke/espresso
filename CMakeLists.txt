@@ -79,11 +79,8 @@ option(WITH_COVERAGE "Generate code coverage report" OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # choose the name of the config file
-set(MYCONFIG_NAME "myconfig.hpp"
+set(MYCONFIG_NAME "myconfig.cmake"
   CACHE STRING "Default name of the local config file")
-
-# Check which config file to use
-include(MyConfig)
 
 ######################################################################
 # Pretty function
@@ -318,7 +315,6 @@ endif()
 
 add_subdirectory(doc)
 add_subdirectory(src)
-add_subdirectory(config)
 
 #######################################################################
 # Feature summary

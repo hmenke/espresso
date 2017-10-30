@@ -26,6 +26,8 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/cmake_config.cmakein
                cmake_config.hpp
 )
 
+include(featuredefs.cmake)
+
 add_subdirectory(core)
 
 if(WITH_SCRIPT_INTERFACE)

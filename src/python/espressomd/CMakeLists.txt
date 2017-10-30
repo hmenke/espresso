@@ -17,13 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-add_custom_command(OUTPUT gen_pxiconfig.cpp
-                   COMMAND ${PYTHON_EXECUTABLE}
-                   ${CMAKE_CURRENT_SOURCE_DIR}/gen_pxiconfig.py
-                   ${CMAKE_SOURCE_DIR}/src/features.def ${CMAKE_CURRENT_BINARY_DIR}/gen_pxiconfig.cpp
-                   DEPENDS ${CMAKE_SOURCE_DIR}/src/features.def
-                  )
-
 include_directories(${CMAKE_BINARY_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/core)
 include_directories(${CMAKE_BINARY_DIR}/src/core)
@@ -32,22 +25,10 @@ if (HDF5_FOUND)
     include_directories(${CMAKE_SOURCE_DIR}/src/core/io/writer/h5md)
 endif(HDF5_FOUND)
 
-add_executable(gen_pxiconfig gen_pxiconfig.cpp)
-add_dependencies(gen_pxiconfig EspressoConfig)
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/myconfig.pxi
-                   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gen_pxiconfig > ${CMAKE_CURRENT_BINARY_DIR}/myconfig.pxi
-                   DEPENDS gen_pxiconfig
-                   )
-
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${NUMPY_INCLUDE_DIR})
 
 add_custom_target(espressomd)
-add_custom_command(OUTPUT code_info.pyx
-        COMMAND ${PYTHON_EXECUTABLE} gen_code_info.py ${CMAKE_SOURCE_DIR}/src/features.def ${CMAKE_CURRENT_BINARY_DIR}/code_info.pyx
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/myconfig.pxi
-        )
 
 file(GLOB cython_SRC *.pyx)
 # Make the cython_SRC, cython_HEADER and cython_AUX a cached variable to
