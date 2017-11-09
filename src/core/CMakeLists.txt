@@ -1,5 +1,5 @@
 file(GLOB EspressoCore_SRC
-          "*.cpp" "io/mpiio/mpiio.cpp")
+          "*.cpp" "io/mpiio/mpiio.cpp" "utils/*.cpp")
 
 
 if( WITH_COVERAGE )

@@ -281,6 +281,20 @@ if(WITH_VALGRIND_INSTRUMENTATION)
   endif(VALGRIND_FOUND)
 endif(WITH_VALGRIND_INSTRUMENTATION)
 
+# Check out the Boost Matheval submodule
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/boost_matheval/.git")
+  # Try to find git
+  find_package(Git)
+  if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    message(STATUS "Initializing/updating Boost Matheval")
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} submodule update --init -- libs/boost_matheval
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  endif()
+endif()
+include_directories(${CMAKE_SOURCE_DIR}/libs/boost_matheval/include)
+
+
 #######################################################################
 # Process MPI settings
 #######################################################################
