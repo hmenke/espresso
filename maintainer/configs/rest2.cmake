@@ -1,5 +1,5 @@
 # left over features that were not compiled with:
 # myconfig-maxset.h or myconfig-restcompile1.h
-BOND_CONSTRAINT
-VIRTUAL_SITES_COM
-ADDITIONAL_CHECKS
+FEATURE(BOND_CONSTRAINT)
+FEATURE(VIRTUAL_SITES_COM)
+FEATURE(ADDITIONAL_CHECKS)
