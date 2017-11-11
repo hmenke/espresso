@@ -70,3 +70,10 @@ BOOST_AUTO_TEST_CASE(integration3) {
     // Evaluating should fail
     BOOST_CHECK_THROW(parser.evaluate({}), std::invalid_argument);
 }
+
+BOOST_AUTO_TEST_CASE(integration4) {
+    Utils::ExpressionParser parser;
+
+    // Missing expression evaluates to zero
+    BOOST_CHECK_EQUAL(parser.evaluate({}), 0);
+}
