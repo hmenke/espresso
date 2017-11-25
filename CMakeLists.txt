@@ -257,7 +257,7 @@ include(RequireCXX11)
 find_package(MPI REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_COMPILE_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MPI_LINK_FLAGS}")
-include_directories(${MPI_INCLUDE_PATH} SYSTEM)
+include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 list(APPEND LIBRARIES ${MPI_LIBRARIES})
 add_definitions(-DH5XX_USE_MPI)
 
@@ -266,7 +266,7 @@ add_definitions(-DH5XX_USE_MPI)
 #######################################################################
 
 find_package(Boost REQUIRED mpi serialization filesystem system)
-include_directories(${Boost_INCLUDE_DIRS} SYSTEM)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 list(APPEND LIBRARIES ${Boost_LIBRARIES})
 
 #######################################################################
