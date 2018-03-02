@@ -56,7 +56,7 @@ class GenericTest(ut.TestCase):
 
         # Run with LJ from expression
         self.system.non_bonded_inter[0,0].lennard_jones.set_params(
-            epsilon=0.0, sigma=0.0, cutoff=self.params["cutoff"], shift=0.0)
+            **self.system.non_bonded_inter[0,0].lennard_jones.default_params())
     
         self.system.non_bonded_inter[0,0].generic.set_params(
             cutoff=1.0,

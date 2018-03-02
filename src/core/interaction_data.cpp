@@ -429,6 +429,10 @@ static void recalc_maximal_cutoff_nonbonded() {
       max_cut_current = std::max(max_cut_current, data->TAB.cutoff());
 #endif
 
+#if true // TODO: Feature guard
+      max_cut_current = std::max(max_cut_current, data->GEN.cutoff());
+#endif
+
 #ifdef SWIMMER_REACTIONS
       if (max_cut_current < data->REACTION_range)
         max_cut_current = data->REACTION_range;
