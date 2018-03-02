@@ -52,7 +52,7 @@ inline void add_generic_pair_force(const Particle *const p1,
                                    double const d[3], double dist,
                                    double force[3]) {
     if (dist < ia_params->GEN.cutoff()) {
-        auto const fac = ia_params->GEN.force(dist);
+        auto const fac = ia_params->GEN.force(dist) / dist;
 
         for (int j = 0; j < 3; j++)
             force[j] -= fac * d[j];
