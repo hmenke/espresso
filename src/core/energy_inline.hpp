@@ -33,6 +33,7 @@
 #include "fene.hpp"
 #include "gaussian.hpp"
 #include "gb.hpp"
+#include "gen.hpp"
 #include "harmonic.hpp"
 #include "harmonic_dumbbell.hpp"
 #include "hat.hpp"
@@ -154,6 +155,11 @@ inline double calc_non_bonded_pair_energy(const Particle *p1, const Particle *p2
 #ifdef TABULATED
   /* tabulated */
   ret += tabulated_pair_energy(p1, p2, ia_params, d, dist);
+#endif
+
+#if true // TODO: Feature guard
+  /* generic */
+  ret += generic_pair_energy(p1, p2, ia_params, d, dist);
 #endif
 
 #ifdef LJCOS

@@ -38,6 +38,12 @@ cdef extern from "TabulatedPotential.hpp":
         vector[double] energy_tab
         vector[double] force_tab
 
+cdef extern from "GenericPotential.hpp":
+    struct GenericPotential:
+        double maxval
+        string force_expr
+        string energy_expr
+
 cdef extern from "interaction_data.hpp":
     cdef struct IA_parameters:
         double LJ_eps
@@ -87,6 +93,7 @@ cdef extern from "interaction_data.hpp":
 
 
         TabulatedPotential TAB
+        GenericPotential GEN
 
         double GB_eps
         double GB_sig
@@ -303,6 +310,11 @@ IF P3M:
 ELSE:
     cdef struct Bonded_coulomb_p3m_sr_bond_parameters:
         double q1q2
+
+IF True: # TODO: Feature guard
+    cdef extern from "gen.hpp":
+        int generic_set_params(int part_type_a, int part_type_b,
+                               double max, string energy, string force);
 
 cdef extern from "interaction_data.hpp":
     cdef struct Fene_bond_parameters:

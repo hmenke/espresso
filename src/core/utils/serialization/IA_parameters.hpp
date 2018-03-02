@@ -16,6 +16,13 @@ void load(Archive &ar, IA_parameters &p,
 
   new (&(p.TAB)) TabulatedPotential(std::move(tab));
 #endif
+
+#if true // TODO: Feature guard
+  GenericPotential gen;
+  ar >> gen;
+
+  new (&(p.GEN)) GenericPotential(std::move(gen));
+#endif
 }
 
 template <typename Archive>
@@ -25,6 +32,10 @@ void save(Archive &ar, IA_parameters const &p,
 
 #ifdef TABULATED
   ar << p.TAB;
+#endif
+
+#if true // TODO: Feature guard
+  ar << p.GEN;
 #endif
 }
 

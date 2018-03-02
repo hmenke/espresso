@@ -1652,6 +1652,7 @@ class NonBondedInteractionHandle(object):
     hertzian = None
     gaussian = None
     tabulated = None
+    generic = None
     soft_sphere = None
     membrane_collision = None
     gay_berne = None
@@ -1699,6 +1700,8 @@ class NonBondedInteractionHandle(object):
             self.gaussian = GaussianInteraction(_type1, _type2)
         IF TABULATED:
             self.tabulated = TabulatedNonBonded(_type1, _type2)
+        IF True: # TODO: Feature guard
+            self.generic = GenericNonBonded(_type1, _type2)
         IF GAY_BERNE:
             self.gay_berne = GayBerneInteraction(_type1, _type2)
         IF DPD:
@@ -2647,6 +2650,82 @@ IF TABULATED == 1:
             """
             if self.state == 0:
                 return True
+
+
+IF True: # TODO: Feature guard
+    cdef class GenericNonBonded(NonBondedInteraction):
+        cdef int state
+
+        def __init__(self, *args, **kwargs):
+            self.state = -1
+            super(GenericNonBonded, self).__init__(*args, **kwargs)
+
+        def type_number(self):
+            return "GENERIC_NONBONDED"
+
+        def type_name(self):
+            """Name of the potential.
+
+            """
+            return "GENERIC"
+
+        def valid_keys(self):
+            """All parameters that can be set.
+
+            """
+            return "cutoff", "energy", "force"
+
+        def required_keys(self):
+            """Parameters that have to be set.
+
+            """
+            return ["cutoff", "energy", "force"]
+
+        def set_params(self, **kwargs):
+            """ Set parameters for the TabulatedNonBonded interaction.
+
+            Parameters
+            ----------
+
+            cutoff: :obj:`float`,
+                    The maximal interaction distance.
+            energy: :obj:`str`
+                    Expression for the energy.
+            force: :obj:`str`
+                   Expression for the force.
+
+            """
+            super(GenericNonBonded, self).set_params(**kwargs)
+
+        def set_default_params(self):
+            """Sets parameters that are not required to their default value.
+
+            """
+            self._params = {'cutoff': -1, 'energy': "", 'force': ""}
+
+        def _get_params_from_es_core(self):
+            cdef ia_parameters * ia_params = get_ia_param_safe(
+                self._part_types[0],
+                self._part_types[1])
+
+            return {'cutoff': ia_params.GEN.maxval,
+                    'energy': ia_params.GEN.energy_expr,
+                    'force': ia_params.GEN.force_expr}
+
+        def _set_params_in_es_core(self):
+            self.state = generic_set_params(self._part_types[0],
+                                            self._part_types[1],
+                                            self._params["cutoff"],
+                                            self._params["energy"],
+                                            self._params["force"])
+
+        def is_active(self):
+            """Check if interaction is active.
+
+            """
+            if self.state == 0:
+                return True
+
 
 IF TABULATED != 1:
     class Tabulated(BondedInteraction):

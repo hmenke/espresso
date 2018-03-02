@@ -27,6 +27,7 @@
 #include "particle_data.hpp"
 #include "utils.hpp"
 
+#include "GenericPotential.hpp"
 #include "TabulatedPotential.hpp"
 
 /** \name Type codes of bonded interactions
@@ -380,6 +381,13 @@ struct IA_parameters {
   /*@{*/
   TabulatedPotential TAB;
 /*@}*/
+#endif
+
+#if true // TODO: Feature guard
+  /** \name Generic potential */
+  /*@{*/
+  GenericPotential GEN;
+  /*@}*/
 #endif
 
 #ifdef DPD

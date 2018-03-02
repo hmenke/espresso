@@ -40,6 +40,7 @@
 #include "forces.hpp"
 #include "gaussian.hpp"
 #include "gb.hpp"
+#include "gen.hpp"
 #include "harmonic.hpp"
 #include "harmonic_dumbbell.hpp"
 #include "hat.hpp"
@@ -245,6 +246,10 @@ inline void calc_non_bonded_pair_force_parts(
 /* tabulated */
 #ifdef TABULATED
   add_tabulated_pair_force(p1, p2, ia_params, d, dist, force);
+#endif
+/* generic */
+#if true // TODO: Feature guard
+  add_generic_pair_force(p1, p2, ia_params, d, dist, force);
 #endif
 /* Gay-Berne */
 #ifdef GAY_BERNE
