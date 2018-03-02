@@ -2709,15 +2709,15 @@ IF True: # TODO: Feature guard
                 self._part_types[1])
 
             return {'cutoff': ia_params.GEN.maxval,
-                    'energy': ia_params.GEN.energy_expr,
-                    'force': ia_params.GEN.force_expr}
+                    'energy': ia_params.GEN.energy_expr.decode('UTF-8'),
+                    'force': ia_params.GEN.force_expr.decode('UTF-8')}
 
         def _set_params_in_es_core(self):
             self.state = generic_set_params(self._part_types[0],
                                             self._part_types[1],
                                             self._params["cutoff"],
-                                            self._params["energy"],
-                                            self._params["force"])
+                                            self._params["energy"].encode('UTF-8'),
+                                            self._params["force"].encode('UTF-8'))
 
         def is_active(self):
             """Check if interaction is active.
