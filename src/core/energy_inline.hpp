@@ -157,7 +157,7 @@ inline double calc_non_bonded_pair_energy(const Particle *p1, const Particle *p2
   ret += tabulated_pair_energy(p1, p2, ia_params, d, dist);
 #endif
 
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
   /* generic */
   ret += generic_pair_energy(p1, p2, ia_params, d, dist);
 #endif
@@ -392,7 +392,7 @@ inline void add_bonded_energy(Particle *p1) {
       }
       break;
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
     case BONDED_IA_GENERIC:
       switch (iaparams->p.gen.type) {
       case GEN_BOND_LENGTH:

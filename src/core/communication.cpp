@@ -1195,7 +1195,7 @@ void mpi_bcast_ia_params(int i, int j) {
       boost::mpi::broadcast(comm_cart, *bonded_ia_params[i].p.tab.pot, 0);
     }
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
     if (bonded_ia_params[i].type == BONDED_IA_GENERIC) {
       boost::mpi::broadcast(comm_cart, *bonded_ia_params[i].p.gen.pot, 0);
     }
@@ -1225,7 +1225,7 @@ void mpi_bcast_ia_params_slave(int i, int j) {
       bonded_ia_params[i].p.tab.pot = tab_pot;
     }
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
     if (bonded_ia_params[i].type == BONDED_IA_GENERIC) {
       auto *pot = new GenericPotential();
       boost::mpi::broadcast(comm_cart, *pot, 0);

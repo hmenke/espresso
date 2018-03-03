@@ -248,7 +248,7 @@ inline void calc_non_bonded_pair_force_parts(
   add_tabulated_pair_force(p1, p2, ia_params, d, dist, force);
 #endif
 /* generic */
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
   add_generic_pair_force(p1, p2, ia_params, d, dist, force);
 #endif
 /* Gay-Berne */
@@ -676,7 +676,7 @@ inline void add_bonded_force(Particle *p1) {
         }
         break;
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
     case BONDED_IA_GENERIC:
       switch (iaparams->p.tab.type) {
       case GEN_BOND_LENGTH:

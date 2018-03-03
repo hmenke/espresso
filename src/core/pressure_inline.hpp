@@ -215,7 +215,7 @@ inline void calc_bonded_force(Particle *p1, Particle *p2,
     }
     break;
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
   case BONDED_IA_GENERIC:
     switch (iaparams->p.gen.type) {
     case GEN_BOND_LENGTH:
@@ -303,7 +303,7 @@ inline void calc_three_body_bonded_forces(Particle *p1, Particle *p2,
     }
     break;
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
   case BONDED_IA_GENERIC:
     switch (iaparams->p.gen.type) {
     case GEN_BOND_ANGLE:
@@ -502,7 +502,7 @@ inline void add_three_body_bonded_stress(Particle *p1) {
       }
     }
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
     else if (type == BONDED_IA_GENERIC) {
       if (iaparams->p.gen.type == GEN_BOND_LENGTH) {
         i = i + 2;

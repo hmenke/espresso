@@ -23,7 +23,7 @@
 
 #include "config.hpp"
 
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
 
 #include "grid.hpp"
 #include "interaction_data.hpp"

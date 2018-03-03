@@ -201,7 +201,7 @@ static void recalc_maximal_cutoff_bonded() {
         max_cut_bonded = bonded_ia_params[i].p.tab.pot->cutoff();
       break;
 #endif
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
     case BONDED_IA_GENERIC:
       if (bonded_ia_params[i].p.gen.type == GEN_BOND_LENGTH &&
           max_cut_bonded < bonded_ia_params[i].p.gen.pot->cutoff())
@@ -436,7 +436,7 @@ static void recalc_maximal_cutoff_nonbonded() {
       max_cut_current = std::max(max_cut_current, data->TAB.cutoff());
 #endif
 
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
       max_cut_current = std::max(max_cut_current, data->GEN.cutoff());
 #endif
 

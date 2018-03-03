@@ -1700,7 +1700,7 @@ class NonBondedInteractionHandle(object):
             self.gaussian = GaussianInteraction(_type1, _type2)
         IF TABULATED:
             self.tabulated = TabulatedNonBonded(_type1, _type2)
-        IF True: # TODO: Feature guard
+        IF EXPRESSION:
             self.generic = GenericNonBonded(_type1, _type2)
         IF GAY_BERNE:
             self.gay_berne = GayBerneInteraction(_type1, _type2)
@@ -2652,7 +2652,7 @@ IF TABULATED == 1:
                 return True
 
 
-IF True: # TODO: Feature guard
+IF EXPRESSION:
     class Generic(BondedInteraction):
 
         def __init__(self, *args, **kwargs):

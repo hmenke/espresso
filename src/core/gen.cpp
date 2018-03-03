@@ -20,7 +20,7 @@
 */
 #include "gen.hpp"
 
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
 
 #include <memory>
 

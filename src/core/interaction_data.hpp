@@ -392,7 +392,7 @@ struct IA_parameters {
 /*@}*/
 #endif
 
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
   /** \name Generic potential */
   /*@{*/
   GenericPotential GEN;

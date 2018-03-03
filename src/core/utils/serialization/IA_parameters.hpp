@@ -20,7 +20,7 @@ void load(Archive &ar, IA_parameters &p,
   new (&(p.TAB)) TabulatedPotential(std::move(tab));
 #endif
 
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
   GenericPotential gen;
   ar >> gen;
 
@@ -42,7 +42,7 @@ void save(Archive &ar, IA_parameters const &p,
   ar << p.TAB;
 #endif
 
-#if true // TODO: Feature guard
+#ifdef EXPRESSION
   ar << p.GEN;
 #endif
 }

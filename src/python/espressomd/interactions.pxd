@@ -311,7 +311,7 @@ ELSE:
     cdef struct Bonded_coulomb_p3m_sr_bond_parameters:
         double q1q2
 
-IF True: # TODO: Feature guard
+IF EXPRESSION:
     cdef extern from "gen.hpp":
         int generic_set_params(int part_type_a, int part_type_b,
                                double max, string energy, string force);
@@ -567,7 +567,7 @@ IF TABULATED:
     cdef extern from "tab.hpp":
         int tabulated_bonded_set_params(int bond_type, TabulatedBondedInteraction tab_type, double min, double max, vector[double] energy, vector[double] force)
 
-IF True: # TODO: Feature guard
+IF EXPRESSION:
     cdef extern from "interaction_data.hpp":
         cdef enum GenericBondedInteraction:
             GEN_UNKNOWN = 0, GEN_BOND_LENGTH, GEN_BOND_ANGLE
