@@ -23,10 +23,12 @@ struct GenericPotential {
           throw std::runtime_error("nullptr dereference");
       }
 
-      force_parser->parse(force_expr);
-      energy_parser->parse(energy_expr);
+      if (!force_expr.empty() && !energy_expr.empty()) {
+          force_parser->parse(force_expr);
+          energy_parser->parse(energy_expr);
 
-      is_parsed = true;
+          is_parsed = true;
+      }
   }
 
   double force(double x) const {

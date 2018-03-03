@@ -42,6 +42,7 @@
 #include "forces.hpp"
 #include "galilei.hpp"
 #include "gb.hpp"
+#include "gen.hpp"
 #include "global.hpp"
 #include "grid.hpp"
 #include "iccp3m.hpp"
@@ -1194,6 +1195,11 @@ void mpi_bcast_ia_params(int i, int j) {
       boost::mpi::broadcast(comm_cart, *bonded_ia_params[i].p.tab.pot, 0);
     }
 #endif
+#if true // TODO: Feature guard
+    if (bonded_ia_params[i].type == BONDED_IA_GENERIC) {
+      boost::mpi::broadcast(comm_cart, *bonded_ia_params[i].p.gen.pot, 0);
+    }
+#endif
   }
 
   on_short_range_ia_change();
@@ -1217,6 +1223,19 @@ void mpi_bcast_ia_params_slave(int i, int j) {
       boost::mpi::broadcast(comm_cart, *tab_pot, 0);
 
       bonded_ia_params[i].p.tab.pot = tab_pot;
+    }
+#endif
+#if true // TODO: Feature guard
+    if (bonded_ia_params[i].type == BONDED_IA_GENERIC) {
+      auto *pot = new GenericPotential();
+      boost::mpi::broadcast(comm_cart, *pot, 0);
+
+      pot->force_parser = std::make_shared<Utils::ExpressionParser>();
+      pot->energy_parser = std::make_shared<Utils::ExpressionParser>();
+
+      pot->parse();
+
+      bonded_ia_params[i].p.gen.pot = pot;
     }
 #endif
   }

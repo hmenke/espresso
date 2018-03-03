@@ -676,6 +676,22 @@ inline void add_bonded_force(Particle *p1) {
         }
         break;
 #endif
+#if true // TODO: Feature guard
+    case BONDED_IA_GENERIC:
+      switch (iaparams->p.tab.type) {
+      case GEN_BOND_LENGTH:
+        bond_broken = calc_gen_bond_force(p1, p2, iaparams, dx, force);
+        break;
+      case GEN_BOND_ANGLE:
+        bond_broken = calc_gen_angle_force(p1, p2, p3, iaparams, force, force2);
+        break;
+      default:
+        runtimeErrorMsg() << "add_bonded_force: generic bond type of atom "
+                          << p1->p.identity << " unknown\n";
+        return;
+      }
+      break;
+#endif
 #ifdef UMBRELLA
       case BONDED_IA_UMBRELLA:
         bond_broken = calc_umbrella_pair_force(p1, p2, iaparams, dx, force);

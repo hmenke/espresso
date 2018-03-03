@@ -2653,6 +2653,90 @@ IF TABULATED == 1:
 
 
 IF True: # TODO: Feature guard
+    class Generic(BondedInteraction):
+
+        def __init__(self, *args, **kwargs):
+            """
+            Generic bond initializer. Used to instantiate a generic bond identifier
+            from a mathematical expression.
+
+            Parameters
+            ----------
+
+            type: :obj:`string`,
+                  The type of bond, one of 'distance' or 'angle'.
+            cutoff: :obj:`float`,
+                    The maximal interaction distance. Has to be pi if
+                    type is 'angle'.
+            energy: :obj:`str`
+                    Expression for the energy.
+            force: :obj:`str`
+                   Expression for the force.
+            """
+            super(Generic, self).__init__(*args, **kwargs)
+
+        def type_number(self):
+            return BONDED_IA_GENERIC
+
+        def type_name(self):
+            """Name of interaction type.
+
+            """
+            return "GENERIC"
+
+        def valid_keys(self):
+            """All parameters that can be set.
+
+            """
+            return "type", "cutoff", "energy", "force"
+
+        def required_keys(self):
+            """Parameters that have to be set.
+
+            """
+            return "type", "cutoff", "energy", "force"
+
+        def set_default_params(self):
+            """Sets parameters to their defaults.
+
+            """
+            self._params = {'cutoff': -1., 'energy': "", 'force': ""}
+
+        def _get_params_from_es_core(self):
+            make_bond_type_exist(self._bond_id)
+            res = \
+                {"type": bonded_ia_params[self._bond_id].p.gen.type,
+                 "cutoff": bonded_ia_params[self._bond_id].p.gen.pot.maxval,
+                 "energy": bonded_ia_params[self._bond_id].p.gen.pot.energy_expr,
+                 "force": bonded_ia_params[self._bond_id].p.gen.pot.force_expr
+                }
+            if res["type"] == 1:
+                res["type"] = "distance"
+            if res["type"] == 2:
+                res["type"] = "angle"
+            return res
+
+        def _set_params_in_es_core(self):
+            if self._params["type"] == "distance":
+                type_num = 1
+            elif self._params["type"] == "angle":
+                type_num = 2
+            else:
+                raise ValueError(
+                    "Generic type needs to be distance or angle")
+
+            res = generic_bonded_set_params(
+                self._bond_id, < GenericBondedInteraction > type_num,
+                self._params["cutoff"],
+                self._params["energy"],
+                self._params["force"])
+
+            if res == 1:
+                raise Exception("Could not setup generic bond. Invalid bond parameters.")
+            # Retrieve some params, Es calculates.
+            self._params = self._get_params_from_es_core()
+
+
     cdef class GenericNonBonded(NonBondedInteraction):
         cdef int state
 
@@ -2682,7 +2766,7 @@ IF True: # TODO: Feature guard
             return ["cutoff", "energy", "force"]
 
         def set_params(self, **kwargs):
-            """ Set parameters for the TabulatedNonBonded interaction.
+            """ Set parameters for the GenericNonBonded interaction.
 
             Parameters
             ----------

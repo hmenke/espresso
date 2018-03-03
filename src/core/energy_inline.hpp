@@ -392,6 +392,22 @@ inline void add_bonded_energy(Particle *p1) {
       }
       break;
 #endif
+#if true // TODO: Feature guard
+    case BONDED_IA_GENERIC:
+      switch (iaparams->p.gen.type) {
+      case GEN_BOND_LENGTH:
+        bond_broken = gen_bond_energy(p1, p2, iaparams, dx, &ret);
+        break;
+      case GEN_BOND_ANGLE:
+        bond_broken = gen_angle_energy(p1, p2, p3, iaparams, &ret);
+        break;
+      default:
+        runtimeErrorMsg() << "add_bonded_energy: generic bond type of atom "
+                          << p1->p.identity << " unknown\n";
+        return;
+      }
+      break;
+#endif
 #ifdef UMBRELLA
     case BONDED_IA_UMBRELLA:
       bond_broken = umbrella_pair_energy(p1, p2, iaparams, dx, &ret);

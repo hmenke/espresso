@@ -399,6 +399,11 @@ cdef extern from "interaction_data.hpp":
 
 
 
+#* Parameters for n-body potential from math expression (n=2,3). */
+    ctypedef struct Generic_bond_parameters:
+        int    type
+        GenericPotential * pot
+
 #* Parameters for n-body overlapped potential (n=2,3,4). */
     cdef struct Overlap_bond_parameters:
         char * filename
@@ -489,6 +494,7 @@ cdef extern from "interaction_data.hpp":
         Angle_cossquare_bond_parameters angle_cossquare
         Dihedral_bond_parameters dihedral
         Tabulated_bond_parameters tab
+        Generic_bond_parameters gen
         Overlap_bond_parameters overlap
         Subt_lj_bond_parameters subt_lj
         Rigid_bond_parameters rigid_bond
@@ -561,6 +567,14 @@ IF TABULATED:
     cdef extern from "tab.hpp":
         int tabulated_bonded_set_params(int bond_type, TabulatedBondedInteraction tab_type, double min, double max, vector[double] energy, vector[double] force)
 
+IF True: # TODO: Feature guard
+    cdef extern from "interaction_data.hpp":
+        cdef enum GenericBondedInteraction:
+            GEN_UNKNOWN = 0, GEN_BOND_LENGTH, GEN_BOND_ANGLE
+    cdef extern from "gen.hpp":
+        int generic_bonded_set_params(int bond_type, GenericBondedInteraction gen_type,
+                                      double max, string energy, string force)
+
 IF ELECTROSTATICS:
     cdef extern from "bonded_coulomb.hpp":
         int bonded_coulomb_set_params(int bond_type, double prefactor)
@@ -581,6 +595,7 @@ cdef extern from "interaction_data.hpp":
         BONDED_IA_ANGLE_OLD,
         BONDED_IA_DIHEDRAL,
         BONDED_IA_TABULATED,
+        BONDED_IA_GENERIC,
         BONDED_IA_SUBT_LJ,
         BONDED_IA_RIGID_BOND,
         BONDED_IA_VIRTUAL_BOND,

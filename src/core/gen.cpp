@@ -18,10 +18,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/** \file tab.cpp
- *
- *  Implementation of \ref tab.hpp
- */
 #include "gen.hpp"
 
 #if true // TODO: Feature guard
@@ -49,6 +45,46 @@ int generic_set_params(int part_type_a, int part_type_b,
   mpi_bcast_ia_params(part_type_a, part_type_b);
 
   return 0;
+}
+
+
+int generic_bonded_set_params(int bond_type,
+                              GenericBondedInteraction type, double max,
+                              std::string const &energy,
+                              std::string const &force) {
+  if (bond_type < 0)
+    throw std::runtime_error("Ill-formed bond type.");
+
+  make_bond_type_exist(bond_type);
+
+  /* set types */
+  bonded_ia_params[bond_type].type = BONDED_IA_GENERIC;
+  bonded_ia_params[bond_type].p.gen.type = type;
+  bonded_ia_params[bond_type].p.gen.pot = new GenericPotential;
+  auto pot = bonded_ia_params[bond_type].p.gen.pot;
+
+  /* set number of interaction partners */
+  if (type == GEN_BOND_LENGTH) {
+    pot->maxval = max;
+    bonded_ia_params[bond_type].num = 1;
+  } else if (type == GEN_BOND_ANGLE) {
+    pot->maxval = PI + ROUND_ERROR_PREC;
+    bonded_ia_params[bond_type].num = 2;
+  } else {
+    throw std::runtime_error("Unsupported generic bond type.");
+  }
+
+  pot->force_expr = force;
+  pot->energy_expr = energy;
+
+  pot->force_parser = std::make_shared<Utils::ExpressionParser>();
+  pot->energy_parser = std::make_shared<Utils::ExpressionParser>();
+
+  pot->parse();
+
+  mpi_bcast_ia_params(bond_type, -1);
+
+  return ES_OK;
 }
 
 #endif

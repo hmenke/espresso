@@ -57,6 +57,8 @@ enum BondedInteraction {
   /** Type of tabulated bonded interaction potential,
       may be of bond length, of bond angle or of dihedral type. */
   BONDED_IA_TABULATED,
+  /** Type of bonded interaction potential from mathematical expression */
+  BONDED_IA_GENERIC,
   /** Type of bonded interaction is a (-LJ) potential. */
   BONDED_IA_SUBT_LJ,
   /** Type of a Rigid/Constrained bond*/
@@ -100,6 +102,13 @@ enum TabulatedBondedInteraction {
   TAB_BOND_LENGTH = 1,
   TAB_BOND_ANGLE = 2,
   TAB_BOND_DIHEDRAL = 3
+};
+
+/** Specify generic bonded interactions  */
+enum GenericBondedInteraction {
+  GEN_UNKNOWN = 0,
+  GEN_BOND_LENGTH = 1,
+  GEN_BOND_ANGLE = 2
 };
 
 /** cutoff for deactivated interactions. Below 0, so that even particles on
@@ -596,6 +605,12 @@ struct Tabulated_bond_parameters {
   TabulatedPotential *pot;
 };
 
+/** Parameters for n-body generic potential (n=2,3,4). */
+struct Generic_bond_parameters {
+  GenericBondedInteraction type;
+  GenericPotential *pot;
+};
+
 #ifdef UMBRELLA
 /** Parameters for umbrella potential */
 struct Umbrella_bond_parameters {
@@ -710,6 +725,7 @@ union Bond_parameters {
 #ifdef TABULATED
   Tabulated_bond_parameters tab;
 #endif
+  Generic_bond_parameters gen;
 #ifdef UMBRELLA
   Umbrella_bond_parameters umbrella;
 #endif

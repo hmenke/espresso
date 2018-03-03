@@ -215,6 +215,23 @@ inline void calc_bonded_force(Particle *p1, Particle *p2,
     }
     break;
 #endif
+#if true // TODO: Feature guard
+  case BONDED_IA_GENERIC:
+    switch (iaparams->p.gen.type) {
+    case GEN_BOND_LENGTH:
+      calc_gen_bond_force(p1, p2, iaparams, dx, force);
+      break;
+    case GEN_BOND_ANGLE:
+      (*i)++;
+      force[0] = force[1] = force[2] = 0;
+      break;
+    default:
+      runtimeErrorMsg() << "calc_bonded_force: generic bond type of atom "
+                        << p1->p.identity << " unknown\n";
+      return;
+    }
+    break;
+#endif
 #ifdef BOND_CONSTRAINT
   case BONDED_IA_RIGID_BOND:
     force[0] = force[1] = force[2] = 0;
@@ -281,6 +298,21 @@ inline void calc_three_body_bonded_forces(Particle *p1, Particle *p2,
       break;
     default:
       runtimeErrorMsg() << "calc_bonded_force: tabulated bond type of atom "
+                        << p1->p.identity << " unknown\n";
+      return;
+    }
+    break;
+#endif
+#if true // TODO: Feature guard
+  case BONDED_IA_GENERIC:
+    switch (iaparams->p.gen.type) {
+    case GEN_BOND_ANGLE:
+      // p1 is *p_mid, p2 is *p_left, p3 is *p_right
+      calc_angle_3body_generic_forces(p1, p2, p3, iaparams, force1, force2,
+                                      force3);
+      break;
+    default:
+      runtimeErrorMsg() << "calc_bonded_force: generic bond type of atom "
                         << p1->p.identity << " unknown\n";
       return;
     }
@@ -463,6 +495,45 @@ inline void add_three_body_bonded_stress(Particle *p1) {
         i = i + 1;
       } else if (iaparams->p.tab.type == TAB_BOND_DIHEDRAL) {
         i = i + 4;
+      } else {
+        runtimeErrorMsg()
+            << "add_three_body_bonded_stress: match not found for particle "
+            << p1->p.identity << ".\n";
+      }
+    }
+#endif
+#if true // TODO: Feature guard
+    else if (type == BONDED_IA_GENERIC) {
+      if (iaparams->p.gen.type == GEN_BOND_LENGTH) {
+        i = i + 2;
+      } else if (iaparams->p.gen.type == GEN_BOND_ANGLE) {
+        p2 = local_particles[p1->bl.e[++i]];
+        p3 = local_particles[p1->bl.e[++i]];
+
+        get_mi_vector(dx12, p1->r.p, p2->r.p);
+        for (j = 0; j < 3; ++j)
+          dx21[j] = -dx12[j];
+
+        get_mi_vector(dx31, p3->r.p, p1->r.p);
+
+        for (j = 0; j < 3; ++j) {
+          force1[j] = 0.0;
+          force2[j] = 0.0;
+          force3[j] = 0.0;
+        }
+
+        calc_three_body_bonded_forces(p1, p2, p3, iaparams, force1, force2,
+                                      force3);
+
+        /* three-body bonded interactions contribute to the stress but not the
+         * scalar pressure */
+        for (k = 0; k < 3; ++k) {
+          for (l = 0; l < 3; ++l) {
+            obsstat_bonded(&p_tensor, type_num)[3 * k + l] +=
+                force2[k] * dx21[l] + force3[k] * dx31[l];
+          }
+        }
+        i = i + 1;
       } else {
         runtimeErrorMsg()
             << "add_three_body_bonded_stress: match not found for particle "
