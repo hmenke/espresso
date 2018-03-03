@@ -2653,7 +2653,7 @@ IF TABULATED == 1:
 
 
 IF EXPRESSION:
-    class Generic(BondedInteraction):
+    class GenericBond(BondedInteraction):
 
         def __init__(self, *args, **kwargs):
             """
@@ -2673,7 +2673,7 @@ IF EXPRESSION:
             force: :obj:`str`
                    Expression for the force.
             """
-            super(Generic, self).__init__(*args, **kwargs)
+            super(GenericBond, self).__init__(*args, **kwargs)
 
         def type_number(self):
             return BONDED_IA_GENERIC

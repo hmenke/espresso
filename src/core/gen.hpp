@@ -110,7 +110,7 @@ inline int calc_gen_bond_force(Particle *p1, Particle *p2,
     if (dist < pot->cutoff()) {
         auto const fac = pot->force(dist) / dist;
 
-        for (int j = 0; j < 3; j++)
+        for (int j = 0; j < 3; ++j)
             force[j] -= fac * dx[j];
 
         return 0;
@@ -131,12 +131,12 @@ inline int calc_gen_bond_force(Particle *p1, Particle *p2,
 */
 inline int gen_bond_energy(Particle *p1, Particle *p2,
                            Bonded_ia_parameters *iaparams, double dx[3],
-                           double *_energy) {
+                           double *energy) {
     auto const *pot = iaparams->p.gen.pot;
     double dist = sqrt(sqrlen(dx));
 
     if (dist < pot->cutoff()) {
-        *_energy = pot->energy(dist);
+        *energy = pot->energy(dist);
         return 0;
     } else {
         return 1;
@@ -160,21 +160,17 @@ inline int calc_gen_angle_force(Particle *p_mid, Particle *p_left,
                                 Bonded_ia_parameters *iaparams,
                                 double force1[3], double force2[3]) {
   /* vector from p_left to p_mid */
-  double vec1[3];
-  get_mi_vector(vec1, p_mid->r.p, p_left->r.p);
-  double d1i = 1.0 / sqrt(sqrlen(vec1));
-  for (int j = 0; j < 3; ++j)
-    vec1[j] *= d1i;
+  Vector3d vec1 = get_mi_vector(p_mid->r.p, p_left->r.p);
+  double d1i = 1.0 / vec1.norm();
+  vec1.normalize();
 
   /* vector from p_mid to p_right */
-  double vec2[3];
-  get_mi_vector(vec2, p_right->r.p, p_mid->r.p);
-  double d2i = 1.0 / sqrt(sqrlen(vec2));
-  for (int j = 0; j < 3; ++j)
-    vec2[j] *= d2i;
+  Vector3d vec2 = get_mi_vector(p_right->r.p, p_mid->r.p);
+  double d2i = 1.0 / vec2.norm();
+  vec2.normalize();
 
   /* scalar product of vec1 and vec2 */
-  double cosine = scalar(vec1, vec2);
+  double cosine = vec1*vec2;
 #ifdef TABANGLEMINUS // TODO: Feature guard
   double phi = acos(-cosine);
 #else
@@ -218,22 +214,16 @@ inline void calc_angle_3body_generic_forces(Particle *p_mid, Particle *p_left,
                                             double force1[3],
                                             double force2[3],
                                             double force3[3]) {
-  double vec12[3]; // espresso convention
-  get_mi_vector(vec12, p_mid->r.p, p_left->r.p);
+  Vector3d vec21 = -get_mi_vector(p_mid->r.p, p_left->r.p);
 
-  double vec21[3];
-  for (int j = 0; j < 3; j++)
-    vec21[j] = -vec12[j];
+  Vector3d vec31 = get_mi_vector(p_right->r.p, p_mid->r.p);
 
-  double vec31[3];
-  get_mi_vector(vec31, p_right->r.p, p_mid->r.p);
-
-  double vec21_sqr = sqrlen(vec21);
+  double vec21_sqr = vec21.norm2();
   double vec21_magn = sqrt(vec21_sqr);
-  double vec31_sqr = sqrlen(vec31);
+  double vec31_sqr = vec31.norm2();
   double vec31_magn = sqrt(vec31_sqr);
 
-  double cos_phi = scalar(vec21, vec31) / (vec21_magn * vec31_magn);
+  double cos_phi = (vec21 * vec31) / (vec21_magn * vec31_magn);
   double sin_phi = sqrt(1.0 - Utils::sqr(cos_phi));
 
   if (cos_phi < -1.0)
@@ -282,19 +272,17 @@ inline int gen_angle_energy(Particle *p_mid, Particle *p_left,
                             Particle *p_right, Bonded_ia_parameters *iaparams,
                             double *energy) {
   /* vector from p_mid to p_left */
-  double vec1[3];
-  get_mi_vector(vec1, p_mid->r.p, p_left->r.p);
-  double vl1 = sqrt(sqrlen(vec1));
+  Vector3d vec1 = get_mi_vector(p_mid->r.p, p_left->r.p);
+  double vl1 = vec1.norm();
 
   /* vector from p_right to p_mid */
-  double vec2[3];
-  get_mi_vector(vec2, p_right->r.p, p_mid->r.p);
-  double vl2 = sqrt(sqrlen(vec2));
+  Vector3d vec2 = get_mi_vector(p_right->r.p, p_mid->r.p);
+  double vl2 = vec2.norm();
 /* calculate phi */
 #ifdef TABANGLEMINUS // TODO: Feature guard
-  double phi = acos(-scalar(vec1, vec2) / (vl1 * vl2));
+  double phi = acos(-(vec1 * vec2) / (vl1 * vl2));
 #else
-  double phi = acos(scalar(vec1, vec2) / (vl1 * vl2));
+  double phi = acos((vec1 * vec2) / (vl1 * vl2));
 #endif
 
   auto const *pot = iaparams->p.gen.pot;
