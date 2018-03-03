@@ -21,7 +21,7 @@ import espressomd
 import numpy as np
 
 # TODO: Feature guard
-#@ut.skipIf(not espressomd.has_features("..."),"Generic potentials not enabled")
+@ut.skipIf(not espressomd.has_features("LENNARD_JONES"),"Missing features")
 class GenericTest(ut.TestCase):
     def setUp(self):
         self.system = espressomd.System(box_l=[10,10,10])
