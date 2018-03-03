@@ -1,6 +1,9 @@
 #ifndef SERIALIZATION_IA_PARAMETERS_HPP
 #define SERIALIZATION_IA_PARAMETERS_HPP
 
+#include <memory>
+
+#include "utils/ExpressionParser.hpp"
 #include "core/interaction_data.hpp"
 
 namespace boost {
@@ -20,6 +23,11 @@ void load(Archive &ar, IA_parameters &p,
 #if true // TODO: Feature guard
   GenericPotential gen;
   ar >> gen;
+
+  gen.force_parser = std::make_shared<Utils::ExpressionParser>();
+  gen.energy_parser = std::make_shared<Utils::ExpressionParser>();
+
+  gen.parse();
 
   new (&(p.GEN)) GenericPotential(std::move(gen));
 #endif

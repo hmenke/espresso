@@ -26,7 +26,10 @@
 
 #if true // TODO: Feature guard
 
+#include <memory>
+
 #include "communication.hpp"
+#include "utils/ExpressionParser.hpp"
 
 int generic_set_params(int part_type_a, int part_type_b,
                        double max, std::string const &energy,
@@ -37,6 +40,11 @@ int generic_set_params(int part_type_a, int part_type_b,
 
   data->GEN.force_expr = force;
   data->GEN.energy_expr = energy;
+
+  data->GEN.force_parser = std::make_shared<Utils::ExpressionParser>();
+  data->GEN.energy_parser = std::make_shared<Utils::ExpressionParser>();
+
+  data->GEN.parse();
 
   mpi_bcast_ia_params(part_type_a, part_type_b);
 
