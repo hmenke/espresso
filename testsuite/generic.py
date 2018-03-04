@@ -60,8 +60,8 @@ class GenericTest(ut.TestCase):
     
         self.system.non_bonded_inter[0,0].generic.set_params(
             cutoff=1.0,
-            energy="4*{epsilon}*(({sigma}/r)**12 - ({sigma}/r)**6)".format(**self.params),
-            force="-48*{epsilon}*(({sigma}/r)**12 - .5*({sigma}/r)**6)/r".format(**self.params))
+            energy="4*{epsilon}*(({sigma}/x)**12 - ({sigma}/x)**6)".format(**self.params),
+            force="-48*{epsilon}*(({sigma}/x)**12 - .5*({sigma}/x)**6)/x".format(**self.params))
 
         self.system.integrator.run(10)
 

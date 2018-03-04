@@ -2672,6 +2672,14 @@ IF EXPRESSION:
                     Expression for the energy.
             force: :obj:`str`
                    Expression for the force.
+
+            In the expressions ``force`` and ``energy`` you may use
+            all of the mathematical operations supported by `Boost
+            Matheval <https://hmenke.github.io/boost_matheval/>`_.
+            There are also two predefined symbols: ``x`` is the
+            position variable which holds the current particle
+            distance or angle (depending on ``type``) and ``t`` holds
+            the current simulation time.
             """
             super(GenericBond, self).__init__(*args, **kwargs)
 
@@ -2778,6 +2786,12 @@ IF EXPRESSION:
             force: :obj:`str`
                    Expression for the force.
 
+            In the expressions ``force`` and ``energy`` you may use
+            all of the mathematical operations supported by `Boost
+            Matheval <https://hmenke.github.io/boost_matheval/>`_.
+            There are also two predefined symbols: ``x`` is the
+            position variable which holds the current particle
+            distance and ``t`` holds the current simulation time.
             """
             super(GenericNonBonded, self).set_params(**kwargs)
 

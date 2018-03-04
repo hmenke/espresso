@@ -1,14 +1,15 @@
 #ifndef CORE_GENERIC_POTENTIAL_HPP
 #define CORE_GENERIC_POTENTIAL_HPP
 
-#include "utils/ExpressionParser.hpp"
+#include <cassert>
+#include <memory>
+#include <string>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/string.hpp>
 
-#include <cassert>
-#include <memory>
-#include <string>
+#include "integrate.hpp"
+#include "utils/ExpressionParser.hpp"
 
 struct GenericPotential {
   double maxval = -1.0;
@@ -34,13 +35,13 @@ struct GenericPotential {
   double force(double x) const {
     assert(x <= maxval);
     assert(is_parsed);
-    return force_parser->evaluate({std::make_pair("r",x)});
+    return force_parser->evaluate({std::make_pair("x",x),std::make_pair("t",sim_time)});
   }
 
   double energy(double x) const {
     assert(x <= maxval);
     assert(is_parsed);
-    return energy_parser->evaluate({std::make_pair("r",x)});
+    return energy_parser->evaluate({std::make_pair("x",x),std::make_pair("t",sim_time)});
   }
 
   double cutoff() const { return maxval; }
