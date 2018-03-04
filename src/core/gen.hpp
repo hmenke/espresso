@@ -170,12 +170,8 @@ inline int calc_gen_angle_force(Particle *p_mid, Particle *p_left,
   vec2.normalize();
 
   /* scalar product of vec1 and vec2 */
-  double cosine = vec1*vec2;
-#ifdef TABANGLEMINUS // TODO: Feature guard
+  double cosine = Utils::clamp(vec1*vec2,-TINY_COS_VALUE,TINY_COS_VALUE);
   double phi = acos(-cosine);
-#else
-  double phi = acos(cosine);
-#endif
   double invsinphi = sin(phi);
   if (invsinphi < TINY_SIN_VALUE)
     invsinphi = TINY_SIN_VALUE;
@@ -230,11 +226,7 @@ inline void calc_angle_3body_generic_forces(Particle *p_mid, Particle *p_left,
     cos_phi = -TINY_COS_VALUE;
   if (cos_phi > 1.0)
     cos_phi = TINY_COS_VALUE;
-#ifdef TABANGLEMINUS // TODO: Feature guard
   double phi = acos(-cos_phi);
-#else
-  double phi = acos(cos_phi);
-#endif
 
   auto const *pot = iaparams->p.gen.pot;
   double dU = pot->force(phi);
@@ -278,12 +270,10 @@ inline int gen_angle_energy(Particle *p_mid, Particle *p_left,
   /* vector from p_right to p_mid */
   Vector3d vec2 = get_mi_vector(p_right->r.p, p_mid->r.p);
   double vl2 = vec2.norm();
-/* calculate phi */
-#ifdef TABANGLEMINUS // TODO: Feature guard
-  double phi = acos(-(vec1 * vec2) / (vl1 * vl2));
-#else
-  double phi = acos((vec1 * vec2) / (vl1 * vl2));
-#endif
+
+  /* calculate phi */
+  double cosine = Utils::clamp((vec1 * vec2) / (vl1 * vl2),-TINY_COS_VALUE,TINY_COS_VALUE);
+  double phi = acos(-cosine);
 
   auto const *pot = iaparams->p.gen.pot;
   *energy = pot->energy(phi);

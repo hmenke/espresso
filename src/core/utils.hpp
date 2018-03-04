@@ -488,6 +488,36 @@ void vecsub(T const *const a, T const *const b, T *const c) {
     c[i] = a[i] - b[i];
 }
 
+/**
+ *  @brief  Returns the value clamped between lo and hi.
+ *  @param  val  A value of arbitrary type.
+ *  @param  lo   A lower limit of arbitrary type.
+ *  @param  hi   An upper limit of arbitrary type.
+ *  @return max(val, lo) if val < hi or min(val, hi) otherwise.
+ */
+template<typename T>
+constexpr T const &
+clamp(T const &val, T const &lo, T const &hi)
+{
+    return (val < lo) ? lo : (hi < val) ? hi : val;
+}
+
+/**
+ *  @brief  Returns the value clamped between lo and hi.
+ *  @param  val   A value of arbitrary type.
+ *  @param  lo    A lower limit of arbitrary type.
+ *  @param  hi    An upper limit of arbitrary type.
+ *  @param  comp  A comparison functor.
+ *  @return max(val, lo, comp) if comp(val, hi)
+ *	      or min(val, hi, comp) otherwise.
+ */
+template<typename T, typename Compare>
+constexpr T const &
+clamp(T const &val, T const &lo, T const &hi, Compare comp)
+{
+    return comp(val, lo) ? lo : comp(hi, val) ? hi : val;
+}
+
 } // namespace Utils
 
 /*@}*/

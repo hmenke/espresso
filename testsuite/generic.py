@@ -56,7 +56,8 @@ class GenericTest(ut.TestCase):
 
         self.system.integrator.run(10)
 
-        reference = np.copy(self.system.part[:].pos)
+        ref_pos = np.copy(self.system.part[:].pos)
+        ref_nrg = self.system.analysis.energy()["non_bonded"]
 
         # Reset particles
         self.setUp()
@@ -72,7 +73,8 @@ class GenericTest(ut.TestCase):
 
         self.system.integrator.run(10)
 
-        np.testing.assert_allclose(np.copy(self.system.part[:].pos), reference)
+        np.testing.assert_allclose(np.copy(self.system.part[:].pos), ref_pos)
+        self.assertAlmostEqual(self.system.analysis.energy()["non_bonded"], ref_nrg)
 
     def test_bonded_distance(self):
         params = { 'k': 1.0, 'r_0': 1.0, 'r_cut': 1.0 }
@@ -84,7 +86,8 @@ class GenericTest(ut.TestCase):
 
         self.system.integrator.run(10)
 
-        reference = np.copy(self.system.part[:].pos)
+        ref_pos = np.copy(self.system.part[:].pos)
+        ref_nrg = self.system.analysis.energy()["bonded"]
 
         # Reset particles
         self.setUp()
@@ -99,8 +102,37 @@ class GenericTest(ut.TestCase):
 
         self.system.integrator.run(10)
 
-        np.testing.assert_allclose(np.copy(self.system.part[:].pos), reference)
+        np.testing.assert_allclose(np.copy(self.system.part[:].pos), ref_pos)
+        self.assertAlmostEqual(self.system.analysis.energy()["bonded"], ref_nrg)
+
+    def test_bonded_angle(self):
+        params = { 'bend': 1.0, 'phi0': np.pi/2 }
+
+        # Run with harmonic bond
+        bond = AngleHarmonic(**params)
+        self.system.bonded_inter.add(bond)
+        self.system.part[1].add_bond((bond,0,2))
+
+        self.system.integrator.run(10)
+
+        ref_pos = np.copy(self.system.part[:].pos)
+        ref_nrg = self.system.analysis.energy()["bonded"]
+
+        # Reset particles
+        self.setUp()
+        self.system.part[1].delete_bond(self.system.part[1].bonds[0])
+
+        # Run with LJ from expression
+        bond = GenericBond(type='angle', cutoff=np.pi,
+                           energy="{bend}/2*(x-{phi0})**2".format(**params),
+                           force="{bend}*(x-{phi0})".format(**params))
+        self.system.bonded_inter.add(bond)
+        self.system.part[1].add_bond((bond,0,2))
+
+        self.system.integrator.run(10)
+
+        np.testing.assert_allclose(np.copy(self.system.part[:].pos), ref_pos)
+        self.assertAlmostEqual(self.system.analysis.energy()["bonded"], ref_nrg)
 
 if __name__ == "__main__":
     ut.main()
-
