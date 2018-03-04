@@ -678,7 +678,7 @@ inline void add_bonded_force(Particle *p1) {
 #endif
 #ifdef EXPRESSION
     case BONDED_IA_GENERIC:
-      switch (iaparams->p.tab.type) {
+      switch (iaparams->p.gen.type) {
       case GEN_BOND_LENGTH:
         bond_broken = calc_gen_bond_force(p1, p2, iaparams, dx, force);
         break;
