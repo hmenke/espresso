@@ -2715,8 +2715,8 @@ IF EXPRESSION:
             res = \
                 {"type": bonded_ia_params[self._bond_id].p.gen.type,
                  "cutoff": bonded_ia_params[self._bond_id].p.gen.pot.maxval,
-                 "energy": bonded_ia_params[self._bond_id].p.gen.pot.energy_expr,
-                 "force": bonded_ia_params[self._bond_id].p.gen.pot.force_expr
+                 "energy": bonded_ia_params[self._bond_id].p.gen.pot.energy_expr.decode('UTF-8'),
+                 "force": bonded_ia_params[self._bond_id].p.gen.pot.force_expr.decode('UTF-8')
                 }
             if res["type"] == 1:
                 res["type"] = "distance"
@@ -2736,8 +2736,8 @@ IF EXPRESSION:
             res = generic_bonded_set_params(
                 self._bond_id, < GenericBondedInteraction > type_num,
                 self._params["cutoff"],
-                self._params["energy"],
-                self._params["force"])
+                self._params["energy"].encode('UTF-8'),
+                self._params["force"].encode('UTF-8'))
 
             if res == 1:
                 raise Exception("Could not setup generic bond. Invalid bond parameters.")
