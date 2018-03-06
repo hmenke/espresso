@@ -26,7 +26,9 @@ struct GenericPotential {
 
       if (!force_expr.empty() && !energy_expr.empty()) {
           force_parser->parse(force_expr);
+          force_parser->optimize();
           energy_parser->parse(energy_expr);
+          energy_parser->optimize();
 
           is_parsed = true;
       }

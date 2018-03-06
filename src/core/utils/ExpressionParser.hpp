@@ -60,6 +60,9 @@ public:
      */
     void parse(std::string const &expr);
 
+    /** @brief Perform constant folding onto the abstract syntax tree */
+    void optimize();
+
     /** @brief Evaluate the abstract syntax tree for a given symbol table
      *
      * @param[in] st The symbol table

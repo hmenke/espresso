@@ -36,6 +36,11 @@ public:
         parser.parse(expr);
     }
 
+    void optimize()
+    {
+        parser.optimize();
+    }
+
     double evaluate(std::map<std::string,double> const &st)
     {
         return parser.evaluate(st);
@@ -51,6 +56,11 @@ ExpressionParser::~ExpressionParser() {}
 void ExpressionParser::parse(std::string const &expr)
 {
     pimpl->parse(expr);
+}
+
+void ExpressionParser::optimize()
+{
+    pimpl->optimize();
 }
 
 double ExpressionParser::evaluate(std::map<std::string,double> const &st)
