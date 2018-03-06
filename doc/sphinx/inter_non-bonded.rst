@@ -74,6 +74,46 @@ The values of :math:`r` are assumed to be equally distributed between
 :math:`r_\mathrm{min}` and :math:`r_\mathrm{max}` with a fixed distance
 of :math:`(r_\mathrm{max}-r_\mathrm{min})/(N_\mathrm{points}-1)`.
 
+.. _User-defined interaction:
+
+User-defined interaction
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note ::
+
+    `Feature EXPRESSION required.`
+
+
+The interface for user-defined interactions is implemented in the
+:class:`espressomd.interactions.GenericNonBonded` class. It can be configured
+with the following syntax::
+
+  system.non_bonded_inter[type1, type2].generic.set_params(
+      cutoff='float', energy='expression', force='expression')
+
+This defines an interaction between particles of the types ``type1``
+and ``type2`` given by the mathematical expression given in ``energy``
+and ``force``.  In the expressions ``force`` and ``energy`` you may
+use all of the mathematical operations supported by `Boost Matheval
+<https://hmenke.github.io/boost_matheval/>`_.  There are also two
+predefined symbols: ``x`` is the position variable which holds the
+current particle distance and ``t`` holds the current simulation time.
+To mimic for example a Lennard-Jones interaction you could use::
+
+  params = { 'epsilon': 0.1, 'sigma': 0.1, 'cutoff': 1.0, 'shift': 0.0  }
+  system.non_bonded_inter[0,0].generic.set_params(
+      cutoff=params['cutoff'],
+      energy="4*{epsilon}*(({sigma}/x)**12 - ({sigma}/x)**6)".format(**params),
+      force="-48*{epsilon}*(({sigma}/x)**12 - .5*({sigma}/x)**6)/x".format(**params))
+
+This example is of course pointless because there is a predefined
+Lennard-Jones interaction in |es|.  As a matter of fact, you should
+always use the built-in interaction (if available) because the
+expression-based potentials come with a severe performance penalty.
+If however your desired interaction is not available or you want an
+interaction with time-dependent parameters, then the user-defined
+expression is a good option.
+
 .. _Lennard-Jones interaction:
 
 Lennard-Jones interaction

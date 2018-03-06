@@ -243,6 +243,51 @@ The bonded interaction can be based on a distance, a bond angle or a
 dihedral angle. This is determined by the ``type`` argument, which can
 be one of the strings ``distance``, ``angle`` or ``dihedral``.
 
+.. _User-defined bond interaction:
+
+User-defined bond interaction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note ::
+
+    `Feature EXPRESSION required.`
+
+
+The interface for user-defined interactions is implemented in the
+:class:`espressomd.interactions.GenericBond` class. It can be configured
+with the following syntax::
+
+  from espressomd.interactions import GenericBond
+  GenericBond(type='str', cutoff='float', energy='expression', force='expression')
+
+This creates a bond type identifier with two-body bond length (``type
+= 'distance'``) or three-body angle (``type = 'angle'``) potential.
+In the expressions ``force`` and ``energy`` you may use all of the
+mathematical operations supported by `Boost Matheval
+<https://hmenke.github.io/boost_matheval/>`_.  There are also two
+predefined symbols: ``x`` is the position variable which holds the
+current particle distance or angle (depending on ``type``) and ``t``
+holds the current simulation time.
+
+For angle-type bonds the cutoff parameter is ignored and overwritten
+by :math:`\pi`.  Also your potential has to be well-defined and
+continuous in the interval :math:`[0,\pi)`.
+
+To mimic for example a harmonic bond you could use::
+
+  params = { 'k': 1.0, 'r_0': 1.0, 'r_cut': 1.0 }
+  bond = GenericBond(type='distance', cutoff=params['r_cut'],
+                     energy="{k}/2*(x-{r_0})**2".format(**params),
+                     force="{k}*(x-{r_0})".format(**params))
+
+This example is of course pointless because there is a predefined
+harmonic bond in |es|.  As a matter of fact, you should always use the
+built-in interaction (if available) because the expression-based
+potentials come with a severe performance penalty.  If however your
+desired interaction is not available or you want an interaction with
+time-dependent parameters, then the user-defined expression is a good
+option.
+
 .. _Calculation of the force and energy:
 
 Calculation of the force and energy

@@ -2673,6 +2673,9 @@ IF EXPRESSION:
             force: :obj:`str`
                    Expression for the force.
 
+            Notes
+            -----
+
             In the expressions ``force`` and ``energy`` you may use
             all of the mathematical operations supported by `Boost
             Matheval <https://hmenke.github.io/boost_matheval/>`_.
@@ -2680,6 +2683,21 @@ IF EXPRESSION:
             position variable which holds the current particle
             distance or angle (depending on ``type``) and ``t`` holds
             the current simulation time.
+
+            Examples
+            --------
+
+            >>> import espressomd
+            >>> from espressomd.interactions import GenericBond
+            >>> system = espressomd.System()
+
+            define a harmonic potential and add it to the system
+
+            >>> params = { 'k': 1.0, 'r_0': 1.0, 'r_cut': 1.0 }
+            >>> bond = GenericBond(type='distance', cutoff=params['r_cut'],
+            >>>                    energy="{k}/2*(x-{r_0})**2".format(**params),
+            >>>                    force="{k}*(x-{r_0})".format(**params))
+            >>> system.bonded_inter.add(bond)
             """
             super(GenericBond, self).__init__(*args, **kwargs)
 
@@ -2712,12 +2730,12 @@ IF EXPRESSION:
 
         def _get_params_from_es_core(self):
             make_bond_type_exist(self._bond_id)
-            res = \
-                {"type": bonded_ia_params[self._bond_id].p.gen.type,
-                 "cutoff": bonded_ia_params[self._bond_id].p.gen.pot.maxval,
-                 "energy": bonded_ia_params[self._bond_id].p.gen.pot.energy_expr.decode('UTF-8'),
-                 "force": bonded_ia_params[self._bond_id].p.gen.pot.force_expr.decode('UTF-8')
-                }
+            res = {
+                "type": bonded_ia_params[self._bond_id].p.gen.type,
+                "cutoff": bonded_ia_params[self._bond_id].p.gen.pot.maxval,
+                "energy": bonded_ia_params[self._bond_id].p.gen.pot.energy_expr.decode('UTF-8'),
+                "force": bonded_ia_params[self._bond_id].p.gen.pot.force_expr.decode('UTF-8')
+            }
             if res["type"] == 1:
                 res["type"] = "distance"
             if res["type"] == 2:
@@ -2779,12 +2797,15 @@ IF EXPRESSION:
             Parameters
             ----------
 
-            cutoff: :obj:`float`,
+            cutoff: :obj:`float`
                     The maximal interaction distance.
             energy: :obj:`str`
                     Expression for the energy.
             force: :obj:`str`
                    Expression for the force.
+
+            Notes
+            -----
 
             In the expressions ``force`` and ``energy`` you may use
             all of the mathematical operations supported by `Boost
@@ -2792,6 +2813,21 @@ IF EXPRESSION:
             There are also two predefined symbols: ``x`` is the
             position variable which holds the current particle
             distance and ``t`` holds the current simulation time.
+
+            Examples
+            --------
+
+            >>> import espressomd
+            >>> from espressomd.interactions import GenericBond
+            >>> system = espressomd.System()
+
+            define a harmonic potential between particles of type 0
+
+            >>> params = { 'k': 1.0, 'r_0': 1.0, 'r_cut': 1.0 }
+            >>> system.non_bonded_inter[0,0].generic.set_params(
+            >>>     cutoff=params['r_cut'],
+            >>>     energy="{k}/2*(x - {r_0})**2".format(**params),
+            >>>     force="{k}*(x - {r_0})".format(**params))
             """
             super(GenericNonBonded, self).set_params(**kwargs)
 
