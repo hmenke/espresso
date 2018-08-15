@@ -2838,7 +2838,7 @@ IF EXPRESSION:
             self._params = {'cutoff': -1, 'energy': "", 'force': ""}
 
         def _get_params_from_es_core(self):
-            cdef ia_parameters * ia_params = get_ia_param_safe(
+            cdef IA_parameters * ia_params = get_ia_param_safe(
                 self._part_types[0],
                 self._part_types[1])
 
